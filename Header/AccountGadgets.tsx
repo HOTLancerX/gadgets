@@ -193,7 +193,7 @@ export default function AccountGadgets({
             if (e.target === e.currentTarget) setModal(null);
           }}
         >
-          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 overflow-hidden">
+          <div className="relative w-full max-w-md">
             <button
               onClick={() => setModal(null)}
               className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition cursor-pointer"
@@ -202,30 +202,6 @@ export default function AccountGadgets({
             </button>
 
             <AuthForm mode={modal} />
-
-            <p className="mt-4 text-center text-xs text-gray-500">
-              {modal === 'login' ? (
-                <>
-                  Don't have an account?{' '}
-                  <button
-                    onClick={() => setModal('signup')}
-                    className="font-bold text-[#0053e2] hover:underline cursor-pointer"
-                  >
-                    Sign up
-                  </button>
-                </>
-              ) : (
-                <>
-                  Already have an account?{' '}
-                  <button
-                    onClick={() => setModal('login')}
-                    className="font-bold text-[#0053e2] hover:underline cursor-pointer"
-                  >
-                    Sign in
-                  </button>
-                </>
-              )}
-            </p>
           </div>
         </div>
       )}
