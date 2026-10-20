@@ -15,6 +15,8 @@ import highlightsElement from "./elements/Highlights";
 import posterGridElement from "./elements/Poster-Grid";
 import GadgetsBox1 from "./box/Box-1";
 import GadgetsBox2 from "./box/Box-2";
+import GadgetsCategoryLayout from "./product-category/Layout";
+import GadgetsProductLayout from "./product/Layout";
 
 export const PLUGINS: PluginMeta = {
     nx:          "gadgets",
@@ -79,6 +81,26 @@ export function register() {
             position: 51,
             active: true,
             component: GadgetsBox2,
+        },
+        {
+            key: "gadgets-product-category",
+            label: "Gadgets Category Layout",
+            type: "product-category",
+            slug: "dynamic",
+            style: "left",
+            position: 30,
+            active: true,
+            component: GadgetsCategoryLayout,
+        },
+        {
+            key: "gadgets-product",
+            label: "Gadgets Product Layout",
+            type: "product",
+            slug: "dynamic",
+            style: "left",
+            position: 30,
+            active: true,
+            component: GadgetsProductLayout,
         },
     ], PLUGINS.nx);
 }

@@ -260,7 +260,7 @@ export default function GadgetsBox1({
                                 alt={data?.title || 'Product'}
                                 width={260}
                                 height={260}
-                                className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-300 mix-blend-multiply"
+                                className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-300 mix-blend-multiply brightness-105"
                                 unoptimized
                             />
                         ) : (
