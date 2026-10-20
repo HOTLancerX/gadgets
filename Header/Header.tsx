@@ -198,7 +198,7 @@ export default function HeaderGadgets({
                       className="w-6 h-6 group-hover:scale-105 transition-transform"
                       style={{ color: brandColor }}
                     />
-                    <span className="absolute -top-1.5 -right-2 bg-[#ffb800] text-gray-950 text-[10px] font-black rounded-full min-w-4 h-4 px-1 flex items-center justify-center leading-none shadow-xs">
+                    <span className="absolute -top-1.5 right-0 bg-[#ffb800] text-gray-950 text-[10px] font-black rounded-full min-w-4 h-4 px-1 flex items-center justify-center leading-none shadow-xs">
                       {count > 99 ? '99+' : count}
                     </span>
                   </div>

@@ -4,26 +4,26 @@
  * cms/plugin/gadgets/Footer/Footer.tsx
  *
  * Exelic Gadgets E-Commerce Footer.
- * Exact match to the provided screenshot:
- *  1. Top Trust Bar: 4 feature columns (Express Delivery, Quality Assured, Support >, Deals >)
- *  2. Middle Info Bar (4 Columns):
- *     - Col 1: Brand Logo, bio tagline, phone, and email
- *     - Col 2: STORE LOCATIONS (Nairobi CBD Store with yellow accent bar, timings, Google Maps link)
- *     - Col 3: ABOUT EXELIC GADGETS & DEALS & OFFERS links
- *     - Col 4: CUSTOMER CARE links
- *  3. Dynamic Mega Category Footer with Faint Brand Watermark:
- *     - Connects to menu slot "footer-1"
- *     - 6 balanced columns (Mobile Phones, Audio & Wearables, Computing, Gaming & Cameras, Accessories, Top Brands)
- *     - Graceful fallback categories matching screenshot
- *  4. Bottom Bar:
- *     - Copyright, Built by NdovuSEOLabs, View our store on Google link
- *     - 6 circular outline social icons (Facebook, TikTok, Instagram, X, YouTube, WhatsApp)
+ * 100% Dynamic:
+ *  1. Middle Info Bar:
+ *     - Col 1: Brand Logo, title, description, and contact info (phone, email, address, admin/editor)
+ *     - Dynamic Footer Sections (Sections 1 to 5) configured in Admin Settings > Footer
+ *  2. Dynamic Mega Category Footer:
+ *     - Connects to menu slot from settings (settings.header_footer_menu or 'footer-1')
+ *     - Renders dynamic menu categories and links matching CMS data
+ *     - Background brand watermark using dynamic site name
+ *  3. Bottom Bar:
+ *     - Dynamic Copyright, Developed by / Credits, Mobile Download link
+ *     - Dynamic Social Media links (custom icons, colors, display modes from Settings > Social Media)
+ *     - Facebook Page embed widget (if configured in settings)
+ *  4. Dynamic styling with customizable colors and background image from settings
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
 import useSettings from '@/lib/useSettings';
+import { xFetch } from '@/lib/express';
 import type { MenuItem } from '@/models/Menu';
 
 export interface GadgetsFooterProps {
@@ -31,102 +31,105 @@ export interface GadgetsFooterProps {
   menuItems?: MenuItem[];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DEFAULT 6 CATEGORY COLUMNS (MATCHING SCREENSHOT FOR MENU "footer-1")
-// Used as initial/fallback state if menu "footer-1" is not yet populated
-// ─────────────────────────────────────────────────────────────────────────────
-const DEFAULT_FOOTER_1_COLUMNS = [
-  {
-    title: 'MOBILE PHONES',
-    items: [
-      { label: 'Smartphones', url: '/category/smartphones' },
-      { label: 'Android Smartphones', url: '/category/android-smartphones' },
-      { label: 'iPhone', url: '/category/iphone' },
-      { label: 'Samsung Phones', url: '/category/samsung-phones' },
-      { label: 'Pixel Phones', url: '/category/pixel-phones' },
-      { label: 'Xiaomi Phones', url: '/category/xiaomi-phones' },
-      { label: 'OnePlus Phones', url: '/category/oneplus-phones' },
-      { label: 'Oppo Phones', url: '/category/oppo-phones' },
-      { label: 'Motorola Phones', url: '/category/motorola-phones' },
-      { label: 'Infinix Phones', url: '/category/infinix-phones' },
-    ],
-  },
-  {
-    title: 'AUDIO & WEARABLES',
-    items: [
-      { label: 'Audio', url: '/category/audio' },
-      { label: 'Headphones', url: '/category/headphones' },
-      { label: 'Bluetooth Speakers', url: '/category/bluetooth-speakers' },
-      { label: 'Microphones', url: '/category/microphones' },
-      { label: 'True Wireless Earbuds', url: '/category/earbuds' },
-      { label: 'Apple AirPods', url: '/category/airpods' },
-      { label: 'Galaxy Buds', url: '/category/galaxy-buds' },
-      { label: 'Smartwatches', url: '/category/smartwatches' },
-      { label: 'Amazfit Smartwatches', url: '/category/amazfit' },
-      { label: 'Apple Watch', url: '/category/apple-watch' },
-    ],
-  },
-  {
-    title: 'COMPUTING',
-    items: [
-      { label: 'Laptops', url: '/category/laptops' },
-      { label: 'Gaming Laptops', url: '/category/gaming-laptops' },
-      { label: 'HP Laptops', url: '/category/hp-laptops' },
-      { label: 'Lenovo Laptops', url: '/category/lenovo-laptops' },
-      { label: 'MacBook Air', url: '/category/macbook-air' },
-      { label: 'MacBook Pro', url: '/category/macbook-pro' },
-      { label: 'Microsoft Surface', url: '/category/surface' },
-      { label: 'Computer Accessories', url: '/category/computer-accessories' },
-      { label: 'Computer Keyboards', url: '/category/keyboards' },
-      { label: 'Mouse', url: '/category/mouse' },
-    ],
-  },
-  {
-    title: 'GAMING & CAMERAS',
-    items: [
-      { label: 'Gaming', url: '/category/gaming' },
-      { label: 'Video Games', url: '/category/video-games' },
-      { label: 'PlayStation Consoles', url: '/category/playstation' },
-      { label: 'Nintendo Consoles', url: '/category/nintendo' },
-      { label: 'Xbox Consoles', url: '/category/xbox' },
-      { label: 'Gaming Controllers', url: '/category/gaming-controllers' },
-      { label: 'PS5 Games', url: '/category/ps5-games' },
-      { label: 'Cameras', url: '/category/cameras' },
-      { label: 'Action Cameras', url: '/category/action-cameras' },
-      { label: 'Gimbal', url: '/category/gimbal' },
-    ],
-  },
-  {
-    title: 'ACCESSORIES',
-    items: [
-      { label: 'Accessories', url: '/category/accessories' },
-      { label: 'Mobile Accessories', url: '/category/mobile-accessories' },
-      { label: 'Apple Accessories', url: '/category/apple-accessories' },
-      { label: 'Phone Chargers', url: '/category/phone-chargers' },
-      { label: 'Power Banks', url: '/category/power-banks' },
-      { label: 'Wireless Chargers', url: '/category/wireless-chargers' },
-      { label: 'Gaming Accessories', url: '/category/gaming-accessories' },
-      { label: 'Laptop Chargers', url: '/category/laptop-chargers' },
-      { label: 'HDMI Cables', url: '/category/hdmi-cables' },
-      { label: 'Car Accessories', url: '/category/car-accessories' },
-    ],
-  },
-  {
-    title: 'TOP BRANDS',
-    items: [
-      { label: 'PlayStation', url: '/brand/playstation' },
-      { label: 'Apple', url: '/brand/apple' },
-      { label: 'UGREEN', url: '/brand/ugreen' },
-      { label: 'Samsung', url: '/brand/samsung' },
-      { label: 'JBL', url: '/brand/jbl' },
-      { label: 'Logitech', url: '/brand/logitech' },
-      { label: 'Xiaomi', url: '/brand/xiaomi' },
-      { label: 'Anker', url: '/brand/anker' },
-      { label: 'Soundcore', url: '/brand/soundcore' },
-      { label: 'Nintendo', url: '/brand/nintendo' },
-    ],
-  },
-];
+export interface FooterSectionItem {
+  id: string;
+  icon: string;
+  name: string;
+  link: string;
+}
+
+export interface FooterSection {
+  id: string;
+  title: string;
+  items: FooterSectionItem[];
+}
+
+export interface SocialItem {
+  id: string;
+  name: string;
+  icon: string;
+  link: string;
+  bg_color: string;
+  text_color: string;
+  show_mode: 'both' | 'text' | 'icon';
+}
+
+function parseFooterSections(values: Record<string, any>): FooterSection[] {
+  const defaultTitles = [
+    'Quick Links',
+    'Customer Care',
+    'Follow Us',
+    'Categories',
+    'Legal & Policy',
+  ];
+  const result: FooterSection[] = [];
+
+  for (let s = 1; s <= 5; s++) {
+    const secTitle = values[`footer_section_${s}_title`] ?? defaultTitles[s - 1];
+    let secItems: FooterSectionItem[] = [];
+
+    if (typeof values[`footer_section_${s}_items`] === 'string') {
+      try {
+        const parsed = JSON.parse(values[`footer_section_${s}_items`]);
+        if (Array.isArray(parsed)) secItems = parsed;
+      } catch {}
+    } else if (Array.isArray(values[`footer_section_${s}_items`])) {
+      secItems = values[`footer_section_${s}_items`];
+    } else {
+      const flatIcon = values[`footer_item_${s}_icon`];
+      const flatName = values[`footer_item_${s}_name`];
+      const flatLink = values[`footer_item_${s}_link`];
+      if (flatIcon || flatName || flatLink) {
+        secItems = [
+          {
+            id: `item-${s}-1`,
+            icon: flatIcon || '',
+            name: flatName || '',
+            link: flatLink || '',
+          },
+        ];
+      }
+    }
+
+    // Only include sections that have items configured or a custom non-empty title with items
+    if (secItems.length > 0) {
+      result.push({
+        id: `sec-${s}`,
+        title: secTitle,
+        items: secItems,
+      });
+    }
+  }
+  return result;
+}
+
+function parseSocialMediaSettings(values: Record<string, any>): SocialItem[] {
+  if (typeof values.social_media_items === 'string') {
+    try {
+      const parsed = JSON.parse(values.social_media_items);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    } catch {}
+  }
+  if (typeof values.social_media === 'string') {
+    try {
+      const parsed = JSON.parse(values.social_media);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((item: any, idx: number) => ({
+          id: item.id || `soc-${idx + 1}`,
+          name: item.name || item.title || 'Social',
+          icon: item.icon || 'fa6-brands:facebook-f',
+          link: item.link || item.url || '#',
+          bg_color: item.bg_color || item.bg || '#3b5998',
+          text_color: item.text_color || '#ffffff',
+          show_mode: item.show_mode || 'icon',
+        }));
+      }
+    } catch {}
+  } else if (Array.isArray(values.social_media)) {
+    return values.social_media;
+  }
+  return [];
+}
 
 export default function FooterGadgets({
   settings: propSettings,
@@ -138,191 +141,168 @@ export default function FooterGadgets({
   const currentYear = new Date().getFullYear();
   const siteName = settings.siteName || settings.site_title || 'Exelic Gadgets';
   const logo = settings.footer_logo || settings.logo || '';
-  const bio =
+  const logoHeight = settings.footer_logo_height || settings.footerLogoHeight || '';
+
+  const aboutTitle = settings.footer_about_title || 'About Our Organization';
+  const aboutDescription =
+    settings.footer_about_description ||
     settings.footer_description ||
     settings.site_description ||
     settings.bio ||
-    'Genuine technology, trusted service and fast delivery across Kenya.';
+    '';
 
-  const phone = settings.footer_phone || settings.phone || settings.help_phone || '+254 112 891 117';
-  const email = settings.footer_email || settings.email || 'exelicgadgets@gmail.com';
-  const storeAddress =
-    settings.store_address ||
-    settings.footer_address ||
-    settings.address ||
-    'Mithoo Biashara Centre, Shop F01, Opposite the Bazaar Plaza, Nairobi CBD';
-  const storeHours = settings.store_hours || settings.business_hours || 'Mon – Sat: 9:00 AM – 6:00 PM · Sun: Closed';
-  const mapsLink = settings.google_maps_link || 'https://maps.google.com';
+  const phone = settings.footer_phone || settings.footer_number || settings.phone || settings.number || '';
+  const email = settings.footer_email || settings.email || '';
+  const address = settings.footer_address || settings.address || settings.store_address || '';
+  const admin = settings.admin || '';
+  const editor = settings.editor || '';
+  const mobileDownload = settings.mobile_download || settings.mobileDownload || '';
+
   const copyright =
-    settings.footer_copyright ||
     settings.copyright ||
+    settings.footer_copyright ||
     `© ${currentYear} ${siteName}. All Rights Reserved.`;
-  const builtBy = settings.developed || 'Built by NdovuSEOLabs';
-  const googleStoreLink = settings.google_store_url || 'https://www.google.com/maps';
+  const developed = settings.developed || '';
+  const googleStoreLink = settings.google_store_url || settings.google_maps_link || '';
 
-  // ── Dynamic "footer-1" Menu Fetching ──
+  // Dynamic colors & background image
+  const bgColor1 = settings.footer_bg_color || settings.footer_bg_1 || '#ffffff';
+  const bgColor2 = settings.footer_bg_color_2 || settings.footer_bg_2 || '#f8fafc';
+  const textColor1 = settings.footer_text_color || settings.footer_text_1 || '#1e293b';
+  const textColor2 = settings.footer_text_color_2 || settings.footer_text_2 || '#64748b';
+  const bgImage = settings.background_image || settings.backgroundImage || settings.bg_image || '';
+
+  // ── 1. Dynamic Footer Sections (from Settings > Footer) ──
+  const dynamicSections = useMemo(() => {
+    return parseFooterSections(settings);
+  }, [settings]);
+
+  // ── 2. Dynamic Social Media Links (from Settings > Social Media) ──
+  const dynamicSocialItems = useMemo(() => {
+    return parseSocialMediaSettings(settings);
+  }, [settings]);
+
+  const fbPageEmbed = settings.fb_page_embed || settings.facebook_embed || '';
+
+  // ── 3. Dynamic Footer Menu (Header / Footer Menu Slot) ──
   const [dynamicMenu, setDynamicMenu] = useState<MenuItem[]>(propMenuItems || []);
 
   useEffect(() => {
-    if (propMenuItems && propMenuItems.length > 0) return;
+    if (propMenuItems && propMenuItems.length > 0) {
+      setDynamicMenu(propMenuItems);
+      return;
+    }
 
     let isMounted = true;
-    const menuSlot = settings.header_footer_menu || 'footer-1';
+    const menuSlot = settings.header_footer_menu || settings.footer_menu || 'footer-1';
 
-    fetch(`/api/menu/${encodeURIComponent(menuSlot)}`)
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data) => {
-        if (isMounted && Array.isArray(data) && data.length > 0) {
-          setDynamicMenu(data);
+    const fetchMenu = async () => {
+      // 1. Try Express xFetch
+      try {
+        const query = menuSlot.match(/^[0-9a-fA-F]{24}$/)
+          ? `/menu?id=${menuSlot}`
+          : `/menu?location=${encodeURIComponent(menuSlot)}`;
+        const res = await xFetch(query);
+        if (res.ok) {
+          const data = await res.json();
+          const items = data.menu?.items || data.items || (Array.isArray(data) ? data : []);
+          if (isMounted && Array.isArray(items) && items.length > 0) {
+            setDynamicMenu(items);
+            return;
+          }
         }
-      })
-      .catch(() => {});
+      } catch (e) {
+        // Continue to fallback
+      }
+
+      // 2. Fallback to Next.js API route
+      try {
+        const res = await fetch(`/api/menu/${encodeURIComponent(menuSlot)}`);
+        if (res.ok) {
+          const data = await res.json();
+          const items = data.menu?.items || data.items || (Array.isArray(data) ? data : []);
+          if (isMounted && Array.isArray(items) && items.length > 0) {
+            setDynamicMenu(items);
+          }
+        }
+      } catch (e) {}
+    };
+
+    fetchMenu();
 
     return () => {
       isMounted = false;
     };
-  }, [propMenuItems, settings.header_footer_menu]);
+  }, [propMenuItems, settings.header_footer_menu, settings.footer_menu]);
 
-  // Transform dynamic menu items or use screenshot default columns
-  const footerColumns = useMemo(() => {
-    if (dynamicMenu && dynamicMenu.length > 0) {
-      return dynamicMenu.map((parent, idx) => {
-        const pRaw = parent as any;
-        const children = parent.children || pRaw.children || [];
-        return {
-          title: (parent.label || pRaw.name || `CATEGORY ${idx + 1}`).toUpperCase(),
-          items: children.map((c: any) => ({
-            label: c.label || c.name || '',
-            url: c.url || c.link || '#',
-          })),
-        };
-      });
+  // Transform dynamic menu items into balanced columns
+  const megaMenuColumns = useMemo(() => {
+    if (!dynamicMenu || dynamicMenu.length === 0) return [];
+
+    const hasChildren = dynamicMenu.some(item => item.children && item.children.length > 0);
+
+    if (hasChildren) {
+      return dynamicMenu
+        .filter(item => (item.children && item.children.length > 0) || item.label)
+        .map((parent, idx) => {
+          const pRaw = parent as any;
+          const children = parent.children || pRaw.children || [];
+          return {
+            id: parent.id || pRaw._id || `col-${idx}`,
+            title: (parent.label || pRaw.name || `Category ${idx + 1}`).toUpperCase(),
+            url: parent.url || pRaw.link || '#',
+            items: children.map((c: any, cIdx: number) => ({
+              id: c.id || c._id || `item-${idx}-${cIdx}`,
+              label: c.label || c.name || '',
+              url: c.url || c.link || '#',
+            })),
+          };
+        });
     }
-    return DEFAULT_FOOTER_1_COLUMNS;
+
+    // Flat items: distribute into up to 6 balanced columns
+    const numCols = Math.min(6, Math.max(1, Math.ceil(dynamicMenu.length / 5)));
+    const cols: { id: string; title: string; url: string; items: { id: string; label: string; url: string }[] }[] = Array.from(
+      { length: numCols },
+      (_, i) => ({ id: `col-${i}`, title: '', url: '#', items: [] })
+    );
+
+    dynamicMenu.forEach((item, idx) => {
+      const colIdx = idx % numCols;
+      cols[colIdx].items.push({
+        id: item.id || `flat-${idx}`,
+        label: item.label || (item as any).name || '',
+        url: item.url || (item as any).link || '#',
+      });
+    });
+
+    return cols.filter(c => c.items.length > 0);
   }, [dynamicMenu]);
 
-  // Social Media Links (from settings)
-  const socialLinks = useMemo(() => {
-    const rawSocial = settings.social_media || settings.socialMedia;
-    let parsed: Record<string, string> = {};
-    if (typeof rawSocial === 'string') {
-      try {
-        parsed = JSON.parse(rawSocial);
-      } catch {}
-    } else if (typeof rawSocial === 'object' && rawSocial !== null) {
-      parsed = rawSocial;
-    }
-
-    return [
-      {
-        icon: 'ri:facebook-fill',
-        label: 'Facebook',
-        url: parsed.facebook || settings.facebook || 'https://facebook.com',
-      },
-      {
-        icon: 'ri:tiktok-fill',
-        label: 'TikTok',
-        url: parsed.tiktok || settings.tiktok || 'https://tiktok.com',
-      },
-      {
-        icon: 'mdi:instagram',
-        label: 'Instagram',
-        url: parsed.instagram || settings.instagram || 'https://instagram.com',
-      },
-      {
-        icon: 'line-md:twitter-x',
-        label: 'X',
-        url: parsed.twitter || parsed.x || settings.twitter || 'https://x.com',
-      },
-      {
-        icon: 'mdi:youtube',
-        label: 'YouTube',
-        url: parsed.youtube || settings.youtube || 'https://youtube.com',
-      },
-      {
-        icon: 'mdi:whatsapp',
-        label: 'WhatsApp',
-        url: parsed.whatsapp || settings.whatsapp || `https://wa.me/${phone.replace(/[^0-9]/g, '')}`,
-      },
-    ];
-  }, [settings, phone]);
-
   return (
-    <footer className="w-full bg-white text-gray-700 font-sans border-t border-gray-200 select-none">
-      
-      {/* ════════════════════ 1. TOP TRUST BADGES BAR ════════════════════ */}
-      <div className="border-b border-gray-200 bg-white">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-gray-200 py-3.5">
-            
-            {/* 1. Express Delivery */}
-            <div className="flex items-center gap-3 px-3 py-2 sm:px-4">
-              <Icon icon="solar:delivery-bold" className="w-6 h-6 text-gray-800 shrink-0" />
-              <div>
-                <h4 className="text-xs sm:text-[13px] font-bold text-gray-900 tracking-tight leading-tight uppercase">
-                  EXPRESS DELIVERY
-                </h4>
-                <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
-                  Countrywide delivery
-                </p>
-              </div>
-            </div>
-
-            {/* 2. Quality Assured */}
-            <div className="flex items-center gap-3 px-3 py-2 sm:px-4">
-              <Icon icon="solar:shield-check-linear" className="w-6 h-6 text-gray-800 shrink-0" />
-              <div>
-                <h4 className="text-xs sm:text-[13px] font-bold text-gray-900 tracking-tight leading-tight uppercase">
-                  QUALITY ASSURED
-                </h4>
-                <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
-                  Guaranteed product quality
-                </p>
-              </div>
-            </div>
-
-            {/* 3. Support > */}
-            <div className="flex items-center gap-3 px-3 py-2 sm:px-4">
-              <Icon icon="solar:headphones-round-linear" className="w-6 h-6 text-gray-800 shrink-0" />
-              <div>
-                <h4 className="text-xs sm:text-[13px] font-bold text-gray-900 tracking-tight leading-tight uppercase flex items-center gap-1">
-                  SUPPORT <span className="text-[#ffb800] font-black">&gt;</span>
-                </h4>
-                <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
-                  Helpful customer support
-                </p>
-              </div>
-            </div>
-
-            {/* 4. Deals > */}
-            <div className="flex items-center gap-3 px-3 py-2 sm:px-4">
-              <Icon icon="solar:tag-linear" className="w-6 h-6 text-gray-800 shrink-0" />
-              <div>
-                <h4 className="text-xs sm:text-[13px] font-bold text-gray-900 tracking-tight leading-tight uppercase flex items-center gap-1">
-                  DEALS <span className="text-[#ffb800] font-black">&gt;</span>
-                </h4>
-                <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
-                  Excellent value
-                </p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      {/* ════════════════════ 2. MIDDLE INFORMATION BAR (4 COLUMNS) ════════════════════ */}
+    <footer
+      className="w-full font-sans border-t border-gray-200 select-none relative"
+      style={{
+        backgroundColor: bgColor1,
+        color: textColor1,
+        backgroundImage: bgImage ? `url(${bgImage})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* ════════════════════ 1. MIDDLE INFORMATION BAR (DYNAMIC) ════════════════════ */}
       <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
           
-          {/* ── Col 1: Brand Info (3.5 cols) ── */}
+          {/* ── Brand & About Column ── */}
           <div className="lg:col-span-4 space-y-4">
             <Link href="/" className="inline-flex items-center gap-2 select-none">
               {logo ? (
                 <img
                   src={logo}
                   alt={siteName}
-                  className="h-9 w-auto object-contain"
+                  className="w-auto object-contain"
+                  style={{ height: logoHeight ? `${logoHeight}px` : '36px' }}
                 />
               ) : (
                 <div className="flex items-center gap-2">
@@ -332,248 +312,257 @@ export default function FooterGadgets({
                       <circle cx="24" cy="20" r="9" stroke="white" strokeWidth="3.5" fill="none" />
                     </svg>
                   </div>
-                  <div className="flex items-baseline font-black tracking-tight text-xl font-sans">
-                    <span className="text-[#f5a623] mr-1">Exelic</span>
-                    <span className="text-[#0053e2]">Gadgets</span>
-                  </div>
+                  <span className="font-black tracking-tight text-xl font-sans" style={{ color: textColor1 }}>
+                    {siteName}
+                  </span>
                 </div>
               )}
             </Link>
 
-            <p className="text-xs sm:text-[13px] text-gray-500 leading-relaxed max-w-sm">
-              {bio}
-            </p>
+            {aboutTitle && (
+              <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider" style={{ color: textColor1 }}>
+                {aboutTitle}
+              </h4>
+            )}
 
+            {aboutDescription && (
+              <p className="text-xs sm:text-[13px] leading-relaxed max-w-sm" style={{ color: textColor2 }}>
+                {aboutDescription}
+              </p>
+            )}
+
+            {/* Contact details */}
             <div className="space-y-2 pt-1 text-xs sm:text-[13px]">
-              <div className="flex items-center gap-2">
-                <Icon icon="solar:phone-calling-linear" className="w-4 h-4 text-[#ffb800] shrink-0" />
-                <a
-                  href={`tel:${phone.replace(/\s+/g, '')}`}
-                  className="text-gray-800 hover:text-[#0053e2] font-semibold transition-colors"
-                >
-                  {phone}
-                </a>
-              </div>
-              <div className="flex items-center gap-2">
-                <Icon icon="solar:letter-linear" className="w-4 h-4 text-[#ffb800] shrink-0" />
-                <a
-                  href={`mailto:${email}`}
-                  className="text-gray-800 hover:text-[#0053e2] transition-colors"
-                >
-                  {email}
-                </a>
-              </div>
+              {phone && (
+                <div className="flex items-center gap-2">
+                  <Icon icon="solar:phone-calling-linear" className="w-4 h-4 text-[#ffb800] shrink-0" />
+                  <a
+                    href={`tel:${phone.replace(/\s+/g, '')}`}
+                    className="font-semibold transition-colors hover:underline"
+                    style={{ color: textColor1 }}
+                  >
+                    {phone}
+                  </a>
+                </div>
+              )}
+
+              {email && (
+                <div className="flex items-center gap-2">
+                  <Icon icon="solar:letter-linear" className="w-4 h-4 text-[#ffb800] shrink-0" />
+                  <a
+                    href={`mailto:${email}`}
+                    className="transition-colors hover:underline"
+                    style={{ color: textColor1 }}
+                  >
+                    {email}
+                  </a>
+                </div>
+              )}
+
+              {address && (
+                <div className="flex items-start gap-2 pt-0.5">
+                  <Icon icon="solar:map-point-linear" className="w-4 h-4 text-[#ffb800] shrink-0 mt-0.5" />
+                  <span style={{ color: textColor2 }} className="leading-relaxed">
+                    {address}
+                  </span>
+                </div>
+              )}
+
+              {(admin || editor) && (
+                <div className="flex items-center gap-3 pt-1 text-[11px]" style={{ color: textColor2 }}>
+                  {admin && <span>Admin: <strong style={{ color: textColor1 }}>{admin}</strong></span>}
+                  {editor && <span>Editor: <strong style={{ color: textColor1 }}>{editor}</strong></span>}
+                </div>
+              )}
+
+              {mobileDownload && (
+                <div className="pt-2">
+                  <a
+                    href={mobileDownload}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold hover:opacity-90 transition"
+                    style={{ borderColor: textColor2, color: textColor1 }}
+                  >
+                    <Icon icon="solar:smartphone-bold" width={14} />
+                    <span>Download Mobile App</span>
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* ── Col 2: Store Locations (3.5 cols) ── */}
-          <div className="lg:col-span-3 space-y-3">
-            <h4 className="text-xs sm:text-[13px] font-black text-gray-900 tracking-wider uppercase">
-              STORE LOCATIONS
-            </h4>
-            <div className="border-l-2 border-[#ffb800] pl-3.5 space-y-1.5 text-xs text-gray-600">
-              <p className="font-bold text-gray-900 text-xs sm:text-[13px]">
-                Nairobi CBD Store
-              </p>
-              <p className="leading-relaxed">
-                {storeAddress}
-              </p>
-              <p className="font-semibold text-gray-800">
-                {phone}
-              </p>
-              <p className="text-[11px] text-gray-500">
-                {storeHours}
-              </p>
-              <div className="pt-1">
-                <a
-                  href={mapsLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block text-[#0053e2] hover:underline font-semibold text-xs"
-                >
-                  Open in Google Maps
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Col 3: About Exelic Gadgets & Deals & Offers (2.5 cols) ── */}
-          <div className="lg:col-span-3 space-y-6">
-            <div>
-              <h4 className="text-xs sm:text-[13px] font-black text-gray-900 tracking-wider uppercase mb-2.5">
-                ABOUT EXELIC GADGETS
+          {/* ── Dynamic Footer Sections (Sections 1 to 5) ── */}
+          {dynamicSections.map((sec) => (
+            <div
+              key={sec.id}
+              className={`${
+                dynamicSections.length <= 2
+                  ? 'lg:col-span-4'
+                  : dynamicSections.length === 3
+                  ? 'lg:col-span-2 sm:col-span-1'
+                  : 'lg:col-span-2'
+              } space-y-3`}
+            >
+              <h4 className="text-xs sm:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>
+                {sec.title}
               </h4>
-              <ul className="space-y-1.5 text-xs text-gray-600">
-                <li>
-                  <Link href="/about" className="hover:text-[#0053e2] transition-colors">
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-[#0053e2] transition-colors">
-                    Contact Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="hover:text-[#0053e2] transition-colors">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/brands" className="hover:text-[#0053e2] transition-colors">
-                    Our Brands
-                  </Link>
-                </li>
+              <ul className="space-y-2 text-xs">
+                {sec.items.map((item) => (
+                  <li key={item.id}>
+                    <Link
+                      href={item.link || '#'}
+                      className="inline-flex items-center gap-1.5 transition-colors hover:underline"
+                      style={{ color: textColor2 }}
+                    >
+                      {item.icon && <Icon icon={item.icon} className="w-3.5 h-3.5 shrink-0" />}
+                      <span>{item.name}</span>
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
+          ))}
 
-            <div>
-              <h4 className="text-xs sm:text-[13px] font-black text-gray-900 tracking-wider uppercase mb-2.5">
-                DEALS &amp; OFFERS
+          {/* Optional Facebook Page Embed Widget */}
+          {fbPageEmbed && fbPageEmbed.includes('<iframe') && (
+            <div className="lg:col-span-4 space-y-2">
+              <h4 className="text-xs sm:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>
+                Follow Our Page
               </h4>
-              <ul className="space-y-1.5 text-xs text-gray-600">
-                <li>
-                  <Link href="/deals" className="hover:text-[#0053e2] transition-colors">
-                    Deals
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/flash-sale" className="hover:text-[#0053e2] transition-colors">
-                    Flash Sale
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/clearance-sale" className="hover:text-[#0053e2] transition-colors">
-                    Clearance Sale
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/new" className="hover:text-[#0053e2] transition-colors">
-                    New at Exelic
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/gift-ideas" className="hover:text-[#0053e2] transition-colors">
-                    Gift Ideas
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/gaming-deals" className="hover:text-[#0053e2] transition-colors">
-                    Gaming Deals
-                  </Link>
-                </li>
-              </ul>
+              <div
+                className="overflow-hidden max-w-full rounded-xl shadow-xs"
+                dangerouslySetInnerHTML={{ __html: fbPageEmbed }}
+              />
             </div>
-          </div>
-
-          {/* ── Col 4: Customer Care (2 cols) ── */}
-          <div className="lg:col-span-2 space-y-3">
-            <h4 className="text-xs sm:text-[13px] font-black text-gray-900 tracking-wider uppercase mb-2.5">
-              CUSTOMER CARE
-            </h4>
-            <ul className="space-y-1.5 text-xs text-gray-600">
-              <li>
-                <Link href="/privacy-policy" className="hover:text-[#0053e2] transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms-conditions" className="hover:text-[#0053e2] transition-colors">
-                  Terms &amp; Conditions
-                </Link>
-              </li>
-              <li>
-                <Link href="/refund-policy" className="hover:text-[#0053e2] transition-colors">
-                  Refund &amp; Returns Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/warranty-policy" className="hover:text-[#0053e2] transition-colors">
-                  Warranty &amp; Repair Policy
-                </Link>
-              </li>
-            </ul>
-          </div>
+          )}
 
         </div>
       </div>
 
-      {/* ════════════════════ 3. DYNAMIC MEGA CATEGORY COLUMNS (MENU "footer-1") ════════════════════ */}
-      <div className="border-t border-gray-200/80 bg-white relative overflow-hidden py-10 sm:py-12">
-        {/* Faint Background Watermark Logo Text */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.035] overflow-hidden">
-          <div className="flex items-center gap-6 transform -rotate-3 scale-110 sm:scale-125">
-            <svg viewBox="0 0 40 40" fill="none" className="w-48 h-48 sm:w-64 sm:h-64 text-gray-900">
-              <circle cx="16" cy="20" r="9" stroke="currentColor" strokeWidth="3" fill="none" />
-              <circle cx="24" cy="20" r="9" stroke="currentColor" strokeWidth="3" fill="none" />
-            </svg>
-            <span className="text-7xl sm:text-9xl font-black tracking-tight text-gray-900 font-sans whitespace-nowrap">
-              Exelic Gadgets
-            </span>
+      {/* ════════════════════ 2. DYNAMIC MEGA CATEGORY MENU ════════════════════ */}
+      {megaMenuColumns.length > 0 && (
+        <div
+          className="border-t border-gray-200/80 relative overflow-hidden py-10 sm:py-12"
+          style={{ backgroundColor: bgColor2 }}
+        >
+          {/* Faint Background Watermark Logo Text */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03] overflow-hidden">
+            <div className="flex items-center gap-6 transform -rotate-3 scale-110 sm:scale-125">
+              <svg viewBox="0 0 40 40" fill="none" className="w-48 h-48 sm:w-64 sm:h-64 text-current">
+                <circle cx="16" cy="20" r="9" stroke="currentColor" strokeWidth="3" fill="none" />
+                <circle cx="24" cy="20" r="9" stroke="currentColor" strokeWidth="3" fill="none" />
+              </svg>
+              <span className="text-7xl sm:text-9xl font-black tracking-tight font-sans whitespace-nowrap text-current">
+                {siteName}
+              </span>
+            </div>
+          </div>
+
+          <div className="container mx-auto px-4 sm:px-6 relative z-10">
+            <div
+              className={`grid gap-6 sm:gap-8 ${
+                megaMenuColumns.length === 1
+                  ? 'grid-cols-1'
+                  : megaMenuColumns.length === 2
+                  ? 'grid-cols-1 sm:grid-cols-2'
+                  : megaMenuColumns.length === 3
+                  ? 'grid-cols-1 sm:grid-cols-3'
+                  : megaMenuColumns.length === 4
+                  ? 'grid-cols-2 sm:grid-cols-4'
+                  : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6'
+              }`}
+            >
+              {megaMenuColumns.map((col) => (
+                <div key={col.id} className="space-y-3">
+                  {col.title && (
+                    <h4 className="text-xs sm:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>
+                      {col.url && col.url !== '#' ? (
+                        <Link href={col.url} className="hover:underline">
+                          {col.title}
+                        </Link>
+                      ) : (
+                        col.title
+                      )}
+                    </h4>
+                  )}
+                  <ul className="space-y-1.5 text-xs">
+                    {col.items.map((item) => (
+                      <li key={item.id}>
+                        <Link
+                          href={item.url || '#'}
+                          className="transition-colors block py-0.5 truncate hover:underline"
+                          style={{ color: textColor2 }}
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+      )}
 
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8">
-            {footerColumns.map((col, cIdx) => (
-              <div key={cIdx} className="space-y-3">
-                <h4 className="text-xs sm:text-[13px] font-black text-gray-900 tracking-wider uppercase">
-                  {col.title}
-                </h4>
-                <ul className="space-y-1.5 text-xs text-gray-600">
-                  {col.items.map((item: any, iIdx: number) => (
-                    <li key={iIdx}>
-                      <Link
-                        href={item.url || '#'}
-                        className="hover:text-[#0053e2] transition-colors block py-0.5 truncate"
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ════════════════════ 4. BOTTOM COPYRIGHT & SOCIAL MEDIA BAR ════════════════════ */}
-      <div className="border-t border-gray-200 bg-white py-5">
+      {/* ════════════════════ 3. BOTTOM COPYRIGHT & SOCIAL MEDIA BAR ════════════════════ */}
+      <div className="border-t border-gray-200 py-5" style={{ backgroundColor: bgColor1 }}>
         <div className="container mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           
-          {/* Left: Copyright & Links */}
-          <div className="text-xs text-gray-600 flex flex-wrap items-center justify-center md:justify-start gap-x-2 gap-y-1">
+          {/* Left: Copyright & Credits */}
+          <div className="text-xs flex flex-wrap items-center justify-center md:justify-start gap-x-2 gap-y-1" style={{ color: textColor2 }}>
             <span>{copyright}</span>
-            <span className="hidden sm:inline text-gray-300">·</span>
-            <span>{builtBy}</span>
-            <span className="hidden sm:inline text-gray-300">·</span>
-            <a
-              href={googleStoreLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-700 hover:text-[#0053e2] font-semibold transition-colors"
-            >
-              View our store on Google
-            </a>
+            {developed && (
+              <>
+                <span className="hidden sm:inline text-gray-300">·</span>
+                <span>{developed}</span>
+              </>
+            )}
+            {googleStoreLink && (
+              <>
+                <span className="hidden sm:inline text-gray-300">·</span>
+                <a
+                  href={googleStoreLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold transition-colors hover:underline"
+                  style={{ color: textColor1 }}
+                >
+                  View on Google Maps
+                </a>
+              </>
+            )}
           </div>
 
-          {/* Right: Circular Outline Social Media Icons */}
-          <div className="flex items-center gap-2 shrink-0">
-            {socialLinks.map((social, sIdx) => (
-              <a
-                key={sIdx}
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={social.label}
-                title={social.label}
-                className="w-8 h-8 rounded-full border border-gray-300 hover:border-gray-900 text-gray-700 hover:text-black flex items-center justify-center transition-all hover:scale-105 shadow-2xs"
-              >
-                <Icon icon={social.icon} className="w-4 h-4" />
-              </a>
-            ))}
-          </div>
+          {/* Right: Dynamic Social Media Icons / Channels */}
+          {dynamicSocialItems.length > 0 && (
+            <div className="flex items-center gap-2 shrink-0 flex-wrap justify-center">
+              {dynamicSocialItems.map((social) => (
+                <a
+                  key={social.id}
+                  href={social.link || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.name}
+                  title={social.name}
+                  className="rounded-full flex items-center justify-center transition-all hover:scale-105 shadow-2xs text-xs font-semibold"
+                  style={{
+                    backgroundColor: social.bg_color || '#3b5998',
+                    color: social.text_color || '#ffffff',
+                    padding: social.show_mode === 'text' ? '4px 10px' : social.show_mode === 'both' ? '4px 10px' : '7px',
+                  }}
+                >
+                  {social.show_mode !== 'text' && (
+                    <Icon icon={social.icon || 'fa6-brands:facebook-f'} className="w-3.5 h-3.5 shrink-0" />
+                  )}
+                  {social.show_mode !== 'icon' && (
+                    <span className={social.show_mode === 'both' ? 'ml-1.5' : ''}>{social.name}</span>
+                  )}
+                </a>
+              ))}
+            </div>
+          )}
 
         </div>
       </div>

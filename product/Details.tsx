@@ -519,11 +519,7 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
                                         <Icon icon="solar:tag-bold" width={13} />
                                         <span>{brand.title}</span>
                                     </Link>
-                                ) : (
-                                    <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-                                        Exelic Gadgets
-                                    </span>
-                                )}
+                                ) : null}
 
                                 <div className="flex items-center gap-2">
                                     <span
@@ -593,7 +589,7 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
                             {/* Short Description */}
                             {shortDescription && (
                                 <div
-                                    className="description"
+                                    className="description pb-6"
                                     dangerouslySetInnerHTML={{ __html: shortDescription }}
                                 />
                             )}
