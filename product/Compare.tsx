@@ -319,7 +319,7 @@ export default function GadgetsCompare({
                     <div
                         key={`empty-slot-${slotIdx}`}
                         onClick={() => setIsSearchOpen(true)}
-                        className="rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-500 bg-gray-50/50 hover:bg-blue-50/20 p-5 flex flex-col items-center justify-center text-center transition-all cursor-pointer min-h-[320px] group shadow-2xs"
+                        className="rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-500 bg-gray-50/50 hover:bg-blue-50/20 p-5 flex flex-col items-center justify-center text-center transition-all cursor-pointer min-h-80 group shadow-2xs"
                     >
                         <div className="w-14 h-14 rounded-2xl bg-white border border-gray-200 text-gray-400 group-hover:text-blue-600 group-hover:border-blue-300 group-hover:scale-110 shadow-xs flex items-center justify-center transition-all mb-3">
                             <Icon icon="solar:add-circle-linear" width={30} />
@@ -327,7 +327,7 @@ export default function GadgetsCompare({
                         <h4 className="text-sm font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
                             Add Device
                         </h4>
-                        <p className="text-xs text-gray-400 mt-1 max-w-[180px]">
+                        <p className="text-xs text-gray-400 mt-1 max-w-45">
                             Compare another model with this product
                         </p>
                         <span className="mt-4 px-3.5 py-1.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-xs font-semibold group-hover:border-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-2xs">
@@ -496,7 +496,7 @@ export default function GadgetsCompare({
                                         {sec.fields.map((fieldTitle, fIdx) => (
                                             <tr key={fIdx} className="hover:bg-gray-50/40 transition-colors">
                                                 {/* Feature / Field Name */}
-                                                <td className="bg-gray-50/70 px-5 py-3.5 text-gray-700 font-semibold border-r border-gray-100 align-top break-words">
+                                                <td className="bg-gray-50/70 px-5 py-3.5 text-gray-700 font-semibold border-r border-gray-100 align-top wrap-break-word">
                                                     {fieldTitle}
                                                 </td>
 
@@ -506,7 +506,7 @@ export default function GadgetsCompare({
                                                     return (
                                                         <td
                                                             key={idx}
-                                                            className="px-5 py-3.5 text-gray-900 font-normal leading-relaxed whitespace-pre-line break-words border-r border-gray-100 last:border-r-0 bg-white align-top"
+                                                            className="px-5 py-3.5 text-gray-900 font-normal leading-relaxed whitespace-pre-line wrap-break-word border-r border-gray-100 last:border-r-0 bg-white align-top"
                                                         >
                                                             {val ? (
                                                                 <span>{val}</span>
