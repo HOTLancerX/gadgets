@@ -222,10 +222,10 @@ export default function GadgetsCompare({
         <section id="compare" className="space-y-6">
             {/* ── Header ── */}
             <div className="space-y-1">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">
                     Compare {currentProduct.title} with Similar Products
                 </h2>
-                <p className="text-xs sm:text-sm text-gray-500">
+                <p className="text-xs md:text-sm text-gray-500">
                     Compare {currentProduct.title} specs, features and price with similar smartphones and alternatives.
                 </p>
             </div>
@@ -239,7 +239,7 @@ export default function GadgetsCompare({
             )}
 
             {/* ── Top Product Cards Grid (4 columns) ── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
                 {/* 1. Current Product Card */}
                 <div className="bg-white rounded-2xl border border-gray-200/90 p-5 flex flex-col justify-between shadow-2xs relative">
                     <div>
@@ -441,7 +441,7 @@ export default function GadgetsCompare({
                     onClick={() => setIsSearchOpen(false)}
                 >
                     <div
-                        className="bg-white rounded-3xl border border-gray-200 max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4"
+                        className="bg-white rounded-3xl border border-gray-200 max-w-lg w-full p-5 md:p-6 shadow-2xl space-y-4"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between pb-3 border-b border-gray-100">
@@ -450,7 +450,7 @@ export default function GadgetsCompare({
                                     <Icon icon="solar:magnifer-bold" width={20} />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm sm:text-base font-bold text-gray-900">
+                                    <h3 className="text-sm md:text-base font-bold text-gray-900">
                                         Add Device to Compare
                                     </h3>
                                     <p className="text-xs text-gray-500">
@@ -480,7 +480,7 @@ export default function GadgetsCompare({
                                 value={searchFilter}
                                 onChange={(e) => setSearchFilter(e.target.value)}
                                 placeholder="Search device name..."
-                                className="w-full text-xs sm:text-sm pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-blue-600 focus:border-blue-600 text-gray-900 transition"
+                                className="w-full text-xs md:text-sm pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-blue-600 focus:border-blue-600 text-gray-900 transition"
                             />
                         </div>
 
@@ -502,7 +502,7 @@ export default function GadgetsCompare({
                                                 )}
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-xs sm:text-sm font-bold text-gray-900 truncate" title={p.title}>
+                                                <p className="text-xs md:text-sm font-bold text-gray-900 truncate" title={p.title}>
                                                     {p.title}
                                                 </p>
                                                 <p className="text-xs font-extrabold text-red-600 mt-0.5">
@@ -533,7 +533,7 @@ export default function GadgetsCompare({
                 {/* Column 0: Specification Label */}
                 <div
                     style={{ width: colWidthPercent }}
-                    className="text-xs sm:text-sm font-extrabold text-gray-900 px-3 shrink-0 flex items-center gap-2"
+                    className="text-xs md:text-sm font-extrabold text-gray-900 px-3 shrink-0 flex items-center gap-2"
                 >
                     <Icon icon="solar:checklist-minimalistic-bold" width={18} className="text-blue-600 shrink-0" />
                     <span>Specification</span>
@@ -574,7 +574,7 @@ export default function GadgetsCompare({
                             {/* Card Header */}
                             <div className="px-6 py-4 border-b border-gray-200/80 flex items-center gap-2.5">
                                 <Icon icon={secIcon} width={18} className="text-gray-500 shrink-0" />
-                                <h3 className="text-sm sm:text-base font-bold text-gray-900 tracking-tight">
+                                <h3 className="text-sm md:text-base font-bold text-gray-900 tracking-tight">
                                     {sec.title}
                                 </h3>
                             </div>
@@ -589,7 +589,7 @@ export default function GadgetsCompare({
                                         ))}
                                     </colgroup>
 
-                                    <tbody className="divide-y divide-gray-100 text-xs sm:text-sm">
+                                    <tbody className="divide-y divide-gray-100 text-xs md:text-sm">
                                         {sec.fields.map((fieldTitle, fIdx) => (
                                             <tr key={fIdx} className="hover:bg-gray-50/40 transition-colors">
                                                 {/* Feature / Field Name */}

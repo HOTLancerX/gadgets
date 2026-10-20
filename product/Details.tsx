@@ -453,7 +453,7 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
             {/* Main Hero Container */}
             <div className="container py-6 space-y-8">
                 {/* ─── 1. TOP HERO: GALLERY + DETAILS ─── */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-3xl border border-gray-200/80 p-5 sm:p-8 shadow-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-3xl border border-gray-200/80 p-5 md:p-8 shadow-xs">
                     {/* Left Column: Image Showcase (5 Cols) */}
                     <div className="space-y-4">
                         {/* Main Image Frame */}
@@ -540,7 +540,7 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
                             </div>
 
                             {/* Product Title */}
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">
+                            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">
                                 {data.title}
                             </h1>
 
@@ -710,34 +710,34 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
                                     </div>
 
                                     {/* 2. M-PESA Secure Pay */}
-                                    <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 sm:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
+                                    <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 md:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
                                         <Icon icon="solar:smartphone-linear" width={26} className="text-emerald-600 mb-2 shrink-0" />
                                         <span className="text-xs font-black tracking-wider text-slate-900 uppercase">
                                             M-PESA
                                         </span>
-                                        <span className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
+                                        <span className="text-[11px] md:text-xs text-slate-500 font-medium mt-0.5">
                                             Secure Pay
                                         </span>
                                     </div>
 
                                     {/* 3. Fast Delivery */}
-                                    <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 sm:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
+                                    <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 md:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
                                         <Icon icon="solar:delivery-linear" width={26} className="text-emerald-600 mb-2 shrink-0" />
                                         <span className="text-xs font-black tracking-wider text-slate-900 uppercase">
                                             DELIVERY
                                         </span>
-                                        <span className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
+                                        <span className="text-[11px] md:text-xs text-slate-500 font-medium mt-0.5">
                                             Fast Dispatch
                                         </span>
                                     </div>
 
                                     {/* 4. Expert Support */}
-                                    <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 sm:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
+                                    <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 md:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
                                         <Icon icon="solar:headphones-round-linear" width={26} className="text-emerald-600 mb-2 shrink-0" />
                                         <span className="text-xs font-black tracking-wider text-slate-900 uppercase">
                                             SUPPORT
                                         </span>
-                                        <span className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
+                                        <span className="text-[11px] md:text-xs text-slate-500 font-medium mt-0.5">
                                             Expert Help
                                         </span>
                                     </div>
@@ -822,13 +822,13 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
 
                 {/* ─── 3. MAIN PRODUCT DESCRIPTION ─── */}
                 {hasOverview && (
-                    <div id="description" className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-xs space-y-4">
+                    <div id="description" className="bg-white rounded-3xl border border-gray-200 p-6 md:p-8 shadow-xs space-y-4">
                         <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">
                             Description
                         </h2>
                         <div className="relative">
                             <div
-                                className={`prose max-w-none text-xs sm:text-sm text-gray-700 leading-relaxed overflow-hidden transition-all duration-500 ${
+                                className={`prose max-w-none text-xs md:text-sm text-gray-700 leading-relaxed overflow-hidden transition-all duration-500 ${
                                     expandedDesc ? "max-h-none" : "max-h-56"
                                 }`}
                                 dangerouslySetInnerHTML={{

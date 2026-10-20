@@ -291,7 +291,7 @@ export default function FooterGadgets({
       }}
     >
       {/* ════════════════════ 1. MIDDLE INFORMATION BAR (DYNAMIC) ════════════════════ */}
-      <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-12">
+      <div className="container mx-auto px-4 md:px-6 py-10 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
           
           {/* ── Brand & About Column ── */}
@@ -320,19 +320,19 @@ export default function FooterGadgets({
             </Link>
 
             {aboutTitle && (
-              <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider" style={{ color: textColor1 }}>
+              <h4 className="text-xs md:text-sm font-bold uppercase tracking-wider" style={{ color: textColor1 }}>
                 {aboutTitle}
               </h4>
             )}
 
             {aboutDescription && (
-              <p className="text-xs sm:text-[13px] leading-relaxed max-w-sm" style={{ color: textColor2 }}>
+              <p className="text-xs md:text-[13px] leading-relaxed max-w-sm" style={{ color: textColor2 }}>
                 {aboutDescription}
               </p>
             )}
 
             {/* Contact details */}
-            <div className="space-y-2 pt-1 text-xs sm:text-[13px]">
+            <div className="space-y-2 pt-1 text-xs md:text-[13px]">
               {phone && (
                 <div className="flex items-center gap-2">
                   <Icon icon="solar:phone-calling-linear" className="w-4 h-4 text-[#ffb800] shrink-0" />
@@ -400,11 +400,11 @@ export default function FooterGadgets({
                 dynamicSections.length <= 2
                   ? 'lg:col-span-4'
                   : dynamicSections.length === 3
-                  ? 'lg:col-span-2 sm:col-span-1'
+                  ? 'lg:col-span-2 md:col-span-1'
                   : 'lg:col-span-2'
               } space-y-3`}
             >
-              <h4 className="text-xs sm:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>
+              <h4 className="text-xs md:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>
                 {sec.title}
               </h4>
               <ul className="space-y-2 text-xs">
@@ -427,7 +427,7 @@ export default function FooterGadgets({
           {/* Optional Facebook Page Embed Widget */}
           {fbPageEmbed && fbPageEmbed.includes('<iframe') && (
             <div className="lg:col-span-4 space-y-2">
-              <h4 className="text-xs sm:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>
+              <h4 className="text-xs md:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>
                 Follow Our Page
               </h4>
               <div
@@ -443,40 +443,40 @@ export default function FooterGadgets({
       {/* ════════════════════ 2. DYNAMIC MEGA CATEGORY MENU ════════════════════ */}
       {megaMenuColumns.length > 0 && (
         <div
-          className="border-t border-gray-200/80 relative overflow-hidden py-10 sm:py-12"
+          className="border-t border-gray-200/80 relative overflow-hidden py-10 md:py-12"
           style={{ backgroundColor: bgColor2 }}
         >
           {/* Faint Background Watermark Logo Text */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03] overflow-hidden">
-            <div className="flex items-center gap-6 transform -rotate-3 scale-110 sm:scale-125">
-              <svg viewBox="0 0 40 40" fill="none" className="w-48 h-48 sm:w-64 sm:h-64 text-current">
+            <div className="flex items-center gap-6 transform -rotate-3 scale-110 md:scale-125">
+              <svg viewBox="0 0 40 40" fill="none" className="w-48 h-48 md:w-64 md:h-64 text-current">
                 <circle cx="16" cy="20" r="9" stroke="currentColor" strokeWidth="3" fill="none" />
                 <circle cx="24" cy="20" r="9" stroke="currentColor" strokeWidth="3" fill="none" />
               </svg>
-              <span className="text-7xl sm:text-9xl font-black tracking-tight font-sans whitespace-nowrap text-current">
+              <span className="text-7xl md:text-9xl font-black tracking-tight font-sans whitespace-nowrap text-current">
                 {siteName}
               </span>
             </div>
           </div>
 
-          <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="container mx-auto px-4 md:px-6 relative z-10">
             <div
-              className={`grid gap-6 sm:gap-8 ${
+              className={`grid gap-6 md:gap-8 ${
                 megaMenuColumns.length === 1
                   ? 'grid-cols-1'
                   : megaMenuColumns.length === 2
-                  ? 'grid-cols-1 sm:grid-cols-2'
+                  ? 'grid-cols-1 md:grid-cols-2'
                   : megaMenuColumns.length === 3
-                  ? 'grid-cols-1 sm:grid-cols-3'
+                  ? 'grid-cols-1 md:grid-cols-3'
                   : megaMenuColumns.length === 4
-                  ? 'grid-cols-2 sm:grid-cols-4'
-                  : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6'
+                  ? 'grid-cols-2 md:grid-cols-4'
+                  : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-6'
               }`}
             >
               {megaMenuColumns.map((col) => (
                 <div key={col.id} className="space-y-3">
                   {col.title && (
-                    <h4 className="text-xs sm:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>
+                    <h4 className="text-xs md:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>
                       {col.url && col.url !== '#' ? (
                         <Link href={col.url} className="hover:underline">
                           {col.title}
@@ -508,20 +508,20 @@ export default function FooterGadgets({
 
       {/* ════════════════════ 3. BOTTOM COPYRIGHT & SOCIAL MEDIA BAR ════════════════════ */}
       <div className="border-t border-gray-200 py-5" style={{ backgroundColor: bgColor1 }}>
-        <div className="container mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="container mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           
           {/* Left: Copyright & Credits */}
           <div className="text-xs flex flex-wrap items-center justify-center md:justify-start gap-x-2 gap-y-1" style={{ color: textColor2 }}>
             <span>{copyright}</span>
             {developed && (
               <>
-                <span className="hidden sm:inline text-gray-300">·</span>
+                <span className="hidden md:inline text-gray-300">·</span>
                 <span>{developed}</span>
               </>
             )}
             {googleStoreLink && (
               <>
-                <span className="hidden sm:inline text-gray-300">·</span>
+                <span className="hidden md:inline text-gray-300">·</span>
                 <a
                   href={googleStoreLink}
                   target="_blank"

@@ -214,7 +214,7 @@ export default function GadgetsBox1({
 
     return (
         <>
-            <div className="group relative flex flex-col justify-between w-full h-full bg-white rounded-2xl border border-gray-200 hover:border-gray-200/90 shadow-2xs hover:shadow-lg transition-all duration-300 p-3 sm:p-4 select-none">
+            <div className="group relative flex flex-col justify-between w-full h-full bg-white rounded-2xl border border-gray-200 hover:border-gray-200/90 shadow-2xs hover:shadow-lg transition-all duration-300 p-3 md:p-4 select-none">
                 {/* ── Top Area: Badges & Photo ── */}
                 <div
                     className="relative w-full overflow-hidden shrink-0 flex items-center justify-center h-(--h-mob) md:h-(--h-desk) mb-3"
@@ -226,17 +226,17 @@ export default function GadgetsBox1({
                     {/* Badges Stack (Top-Left) matching screenshot */}
                     <div className="absolute top-1 left-1 z-10 flex flex-col items-start gap-1">
                         {isNew && (
-                            <span className="bg-[#059669] text-white text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-2xs tracking-wider">
+                            <span className="bg-[#059669] text-white text-[9px] md:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-2xs tracking-wider">
                                 NEW
                             </span>
                         )}
                         {isSale && (
-                            <span className="bg-[#dc2626] text-white text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-2xs tracking-wider">
+                            <span className="bg-[#dc2626] text-white text-[9px] md:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-2xs tracking-wider">
                                 SALE
                             </span>
                         )}
                         {isDeal && (
-                            <span className="bg-[#2563eb] text-white text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-2xs tracking-wider">
+                            <span className="bg-[#2563eb] text-white text-[9px] md:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-2xs tracking-wider">
                                 DEAL
                             </span>
                         )}
@@ -244,7 +244,7 @@ export default function GadgetsBox1({
 
                     {/* Out of Stock Pill */}
                     {!inStock && (
-                        <span className="absolute top-1 right-1 z-10 bg-gray-900/80 text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded shadow-2xs">
+                        <span className="absolute top-1 right-1 z-10 bg-gray-900/80 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded shadow-2xs">
                             Sold Out
                         </span>
                     )}
@@ -252,7 +252,7 @@ export default function GadgetsBox1({
                     {/* Centered Device Photo with Zoom Hover */}
                     <Link
                         href={href}
-                        className="w-full h-full flex items-center justify-center p-2 sm:p-3"
+                        className="w-full h-full flex items-center justify-center p-2 md:p-3"
                     >
                         {displayImg ? (
                             <Image
@@ -288,7 +288,7 @@ export default function GadgetsBox1({
                     {/* Product Title */}
                     <Link
                         href={href}
-                        className="block text-sm sm:text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate tracking-tight"
+                        className="block text-sm md:text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate tracking-tight"
                         title={data?.title}
                     >
                         {data?.title}
@@ -297,11 +297,11 @@ export default function GadgetsBox1({
                     {/* Stock Status */}
                     <div className="pt-0.5">
                         {inStock ? (
-                            <span className="text-[11px] sm:text-xs font-medium text-emerald-600">
+                            <span className="text-[11px] md:text-xs font-medium text-emerald-600">
                                 In stock
                             </span>
                         ) : (
-                            <span className="text-[11px] sm:text-xs font-medium text-rose-500">
+                            <span className="text-[11px] md:text-xs font-medium text-rose-500">
                                 Out of stock
                             </span>
                         )}
@@ -310,11 +310,11 @@ export default function GadgetsBox1({
                     {/* Price Row */}
                     <div className="flex items-baseline gap-1.5 flex-wrap pt-0.5">
                         {priceType === 'variant' && minPrice !== maxPrice && (
-                            <span className="text-xs sm:text-sm text-gray-400 font-normal">
+                            <span className="text-xs md:text-sm text-gray-400 font-normal">
                                 From
                             </span>
                         )}
-                        <span className="text-sm sm:text-base font-extrabold text-gray-950 tracking-tight">
+                        <span className="text-sm md:text-base font-extrabold text-gray-950 tracking-tight">
                             {currencySymbol} {fmtPrice(displayPrice)}
                         </span>
                     </div>

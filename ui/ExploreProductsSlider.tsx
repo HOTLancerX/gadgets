@@ -276,7 +276,7 @@ export default function ExploreProductsSlider({
 
     return (
         <section
-            className={`w-full select-none font-sans py-4 sm:py-6 ${sliderScope}`}
+            className={`w-full select-none font-sans py-4 md:py-6 ${sliderScope}`}
             style={{ margin, padding }}
         >
             {/* Scoped CSS for Dynamic Responsive Columns */}
@@ -317,9 +317,9 @@ export default function ExploreProductsSlider({
 
             <div className="w-full space-y-6">
                 {/* ── Header Row: Title & Category Tabs ── */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="shrink-0">
-                        <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                        <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
                             <span>{titlePrefix}</span>
                             <span className="text-gray-900 font-extrabold">{titleHighlight}</span>
                         </h2>
@@ -335,7 +335,7 @@ export default function ExploreProductsSlider({
                                             key={tab.id}
                                             type="button"
                                             onClick={() => setActiveTabId(tab.id)}
-                                            className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                                            className={`px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
                                                 isActive
                                                     ? 'bg-[#0f172a] text-white shadow-xs scale-102'
                                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
@@ -351,7 +351,7 @@ export default function ExploreProductsSlider({
                         {viewAllLink && (
                             <Link
                                 href={viewAllLink}
-                                className="text-xs sm:text-sm font-bold text-gray-700 hover:text-blue-600 transition flex items-center gap-1 shrink-0 ml-1"
+                                className="text-xs md:text-sm font-bold text-gray-700 hover:text-blue-600 transition flex items-center gap-1 shrink-0 ml-1"
                             >
                                 <span>View all</span>
                                 <Icon icon="solar:arrow-right-linear" width={14} />
@@ -368,7 +368,7 @@ export default function ExploreProductsSlider({
                             type="button"
                             onClick={scrollPrev}
                             disabled={!canPrev}
-                            className={`absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-200 shadow-md cursor-pointer ${
+                            className={`absolute -left-3 md:-left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all duration-200 shadow-md cursor-pointer ${
                                 canPrev
                                     ? 'bg-[#0f172a] text-white hover:bg-black hover:scale-105 active:scale-95'
                                     : 'bg-gray-100 text-gray-400 opacity-0 pointer-events-none'
@@ -416,7 +416,7 @@ export default function ExploreProductsSlider({
                             type="button"
                             onClick={scrollNext}
                             disabled={!canNext}
-                            className={`absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-200 shadow-md cursor-pointer ${
+                            className={`absolute -right-3 md:-right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all duration-200 shadow-md cursor-pointer ${
                                 canNext
                                     ? 'bg-[#0f172a] text-white hover:bg-black hover:scale-105 active:scale-95'
                                     : 'bg-gray-100 text-gray-400 opacity-0 pointer-events-none'

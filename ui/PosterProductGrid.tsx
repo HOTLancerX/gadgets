@@ -341,14 +341,14 @@ export default function PosterProductGrid({
 
     return (
         <section
-            className="w-full select-none font-sans py-4 sm:py-6"
+            className="w-full select-none font-sans py-4 md:py-6"
             style={{ margin, padding }}
         >
-            <div className="w-full space-y-4 sm:space-y-6">
+            <div className="w-full space-y-4 md:space-y-6">
                 {/* ── Header: Title ── */}
                 {(titlePrefix || titleHighlight) && (
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <h2 className="text-xl md:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
                             {titlePrefix && <span>{titlePrefix}</span>}
                             {titleHighlight && (
                                 <span className="text-indigo-950 dark:text-indigo-400">
@@ -392,8 +392,8 @@ export default function PosterProductGrid({
                             )}
 
                             {/* Bottom Content Area: Product Title + Add to cart Button */}
-                            <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6 z-20 flex flex-col items-start gap-3 pointer-events-none">
-                                <h3 className="text-lg sm:text-xl md:text-2xl font-black text-white tracking-tight drop-shadow-md line-clamp-1 pointer-events-auto">
+                            <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 z-20 flex flex-col items-start gap-3 pointer-events-none">
+                                <h3 className="text-lg md:text-xl md:text-2xl font-black text-white tracking-tight drop-shadow-md line-clamp-1 pointer-events-auto">
                                     {card.link ? (
                                         <Link href={card.link} className="hover:underline">
                                             {card.title}
@@ -407,7 +407,7 @@ export default function PosterProductGrid({
                                 <button
                                     type="button"
                                     onClick={(e) => handleAddToCart(card, e)}
-                                    className="pointer-events-auto inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-white text-slate-900 text-xs sm:text-sm font-bold shadow-md hover:bg-slate-100 active:scale-95 transition-all duration-200 cursor-pointer"
+                                    className="pointer-events-auto inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-white text-slate-900 text-xs md:text-sm font-bold shadow-md hover:bg-slate-100 active:scale-95 transition-all duration-200 cursor-pointer"
                                 >
                                     {addedId === card.id ? (
                                         <span className="flex items-center gap-1.5 text-emerald-600 font-extrabold">

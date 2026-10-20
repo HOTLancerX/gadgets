@@ -54,7 +54,7 @@ export default function ProSliderVariants({
                   <img
                     src={v.image}
                     alt={v.name}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain mix-blend-multiply brightness-105"
                     loading="lazy"
                   />
                 </div>

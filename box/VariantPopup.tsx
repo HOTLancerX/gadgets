@@ -125,7 +125,7 @@ export default function VariantPopup({
 
     const modal = (
         <div
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 select-none"
+            className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 select-none"
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
             }}
@@ -137,10 +137,10 @@ export default function VariantPopup({
             <div className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity" onClick={onClose} />
 
             {/* Modal Box */}
-            <div className="relative z-10 bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative z-10 bg-white w-full md:max-w-lg rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
-                <div className="p-4 sm:p-5 flex items-start gap-4 border-b border-gray-100">
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center p-1">
+                <div className="p-4 md:p-5 flex items-start gap-4 border-b border-gray-100">
+                    <div className="relative w-20 h-20 md:w-24 md:h-24 bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center p-1">
                         {previewImg ? (
                             <Image
                                 src={previewImg}
@@ -155,11 +155,11 @@ export default function VariantPopup({
                         )}
                     </div>
                     <div className="flex-1 min-w-0 pr-6">
-                        <h3 className="text-sm sm:text-base font-bold text-gray-900 leading-snug line-clamp-2">
+                        <h3 className="text-sm md:text-base font-bold text-gray-900 leading-snug line-clamp-2">
                             {productTitle}
                         </h3>
                         <div className="mt-2 flex items-baseline gap-2">
-                            <span className="text-lg sm:text-xl font-extrabold text-gray-950">
+                            <span className="text-lg md:text-xl font-extrabold text-gray-950">
                                 {price > 0 ? fmtPrice(price, currencySymbol) : 'Select options'}
                             </span>
                         </div>
@@ -187,7 +187,7 @@ export default function VariantPopup({
                 </div>
 
                 {/* Attributes Picker */}
-                <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
+                <div className="p-4 md:p-5 space-y-4 overflow-y-auto flex-1">
                     {selectedAttributes.map((attr) => (
                         <div key={attr.label} className="space-y-2">
                             <label className="text-xs font-bold text-gray-700 tracking-wide uppercase">
@@ -241,7 +241,7 @@ export default function VariantPopup({
                 </div>
 
                 {/* Footer Action */}
-                <div className="p-4 sm:p-5 border-t border-gray-100 bg-gray-50/50 flex gap-3">
+                <div className="p-4 md:p-5 border-t border-gray-100 bg-gray-50/50 flex gap-3">
                     <button
                         type="button"
                         onClick={onClose}

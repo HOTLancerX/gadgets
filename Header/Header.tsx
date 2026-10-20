@@ -82,7 +82,7 @@ export default function HeaderGadgets({
 
   const isSticky = settings.header_sticky !== 'false';
   const currencySymbol = (settings.product_currency_symbol || settings.currency_symbol || 'KSh') as string;
-  const brandColor = settings.header_color || settings.primary_color || '#0053e2';
+  const brandColor = settings.color_main;
   const supportPhone = settings.help_phone || settings.header_phone || settings.phone || '+254 112891117';
   const helpLabel = settings.help_label || 'Need help?';
 
@@ -256,16 +256,16 @@ export default function HeaderGadgets({
             onMouseEnter={() => handleMouseEnter(activeMegaItem.id)}
             onMouseLeave={handleMouseLeave}
           >
-            <div className="container mx-auto px-4 sm:px-6 py-4">
+            <div className="container mx-auto px-4 md:px-6 py-4">
               
               {/* Mega Menu Top Header: Category Title + View all */}
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-gray-100">
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight">
+                <h3 className="text-base md:text-lg font-bold text-gray-900 tracking-tight">
                   {activeMegaItem.label}
                 </h3>
                 <Link
                   href={activeMegaItem.url || '#'}
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold hover:underline"
+                  className="inline-flex items-center gap-1 text-xs md:text-sm font-semibold hover:underline"
                   style={{ color: brandColor }}
                 >
                   <span>View all</span>
@@ -310,7 +310,7 @@ function MegaMenuColumns({
   });
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 pb-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 pb-3">
       {columns.map((colGroups, cIdx) => (
         <div key={cIdx} className="space-y-6">
           {colGroups.map((group: any, gIdx: number) => {
@@ -321,7 +321,7 @@ function MegaMenuColumns({
                 {/* Group Heading */}
                 <Link
                   href={group.url || group.link || '#'}
-                  className="block font-bold text-xs sm:text-sm text-gray-900 hover:text-[#0053e2] transition-colors"
+                  className="block font-bold text-xs md:text-sm text-gray-900 hover:text-[#0053e2] transition-colors"
                 >
                   {group.label || group.name}
                 </Link>

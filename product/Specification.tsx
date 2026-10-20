@@ -103,7 +103,7 @@ export default function GadgetsSpecification({ specifications = [], productTitle
     return (
         <section id="specifications" className="space-y-6">
             {/* Header & Search Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0 shadow-2xs">
                         <Icon icon="solar:devices-bold-duotone" width={22} />
@@ -119,7 +119,7 @@ export default function GadgetsSpecification({ specifications = [], productTitle
                 </div>
 
                 {/* Instant Spec Search */}
-                <div className="relative w-full sm:w-64">
+                <div className="relative w-full md:w-64">
                     <Icon
                         icon="solar:magnifer-linear"
                         width={16}
@@ -171,7 +171,7 @@ export default function GadgetsSpecification({ specifications = [], productTitle
                             {/* Card Header */}
                             <div className="px-6 py-4 border-b border-gray-200/80 flex items-center gap-2.5">
                                 <Icon icon={boxIcon} width={18} className="text-gray-500 shrink-0" />
-                                <h3 className="text-sm sm:text-base font-bold text-gray-900 tracking-tight">
+                                <h3 className="text-sm md:text-base font-bold text-gray-900 tracking-tight">
                                     {box.title}
                                 </h3>
                             </div>
@@ -181,10 +181,10 @@ export default function GadgetsSpecification({ specifications = [], productTitle
                                 {box.fields.map((field, fIdx) => (
                                     <div
                                         key={fIdx}
-                                        className="flex flex-col sm:flex-row text-xs sm:text-sm hover:bg-gray-50/40 transition-colors"
+                                        className="flex flex-col md:flex-row text-xs md:text-sm hover:bg-gray-50/40 transition-colors"
                                     >
                                         {/* Field Label / Key */}
-                                        <div className="w-full md:w-100 sm:shrink-0 bg-gray-100/60 px-6 py-3.5 text-gray-600 font-medium sm:border-r border-gray-100 flex items-center">
+                                        <div className="w-full md:w-100 md:shrink-0 bg-gray-100/60 px-6 py-3.5 text-gray-600 font-medium md:border-r border-gray-100 flex items-center">
                                             {field.title}
                                         </div>
 

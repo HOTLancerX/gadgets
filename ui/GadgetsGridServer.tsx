@@ -67,8 +67,8 @@ export default function GadgetsGridServer({ schema }: { schema: any }) {
       <div className="w-full">
         {/* ─── Header: "Top Categories" with Vibrant Gradient ─── */}
         {showTitle && (
-          <div className="mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight flex items-center gap-2">
+          <div className="mb-6 md:mb-8">
+            <h2 className="text-2xl md:text-3xl md:text-4xl font-extrabold tracking-tight flex items-center gap-2">
               <span style={{ color: titlePrefixColor }}>{titlePrefix}</span>
               <span
                 className="bg-clip-text text-transparent"
@@ -122,7 +122,7 @@ export default function GadgetsGridServer({ schema }: { schema: any }) {
                 {/* Category Title */}
                 <div className="w-full">
                   <span
-                    className="text-xs sm:text-[13px] font-semibold leading-tight line-clamp-2 block transition-colors duration-200 text-(--text-color) group-hover:text-(--hover-text-color)"
+                    className="text-xs md:text-[13px] font-semibold leading-tight line-clamp-2 block transition-colors duration-200 text-(--text-color) group-hover:text-(--hover-text-color)"
                     style={{
                       '--text-color': textColor,
                       '--hover-text-color': hoverTextColor,

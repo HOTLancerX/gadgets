@@ -240,15 +240,15 @@ export default function ProCategoryGrid({
 
     return (
         <section
-            className="w-full select-none font-sans py-4 sm:py-6"
+            className="w-full select-none font-sans py-4 md:py-6"
             style={{ margin, padding }}
         >
             <div className="w-full space-y-6">
                 {/* ── Header: Title on LEFT, Categories on RIGHT ── */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     {/* Left: Section Title */}
                     <div className="shrink-0">
-                        <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                        <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
                             <span>{titlePrefix}</span>
                             <span className="bg-linear-to-r from-orange-500 via-pink-500 to-purple-600 bg-clip-text text-transparent">
                                 {titleHighlight}
@@ -268,7 +268,7 @@ export default function ProCategoryGrid({
                                             key={tab.id}
                                             type="button"
                                             onClick={() => setActiveTabId(tab.id)}
-                                            className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                                            className={`px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
                                                 isActive
                                                     ? 'bg-[#0f172a] text-white shadow-xs scale-102'
                                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
@@ -284,7 +284,7 @@ export default function ProCategoryGrid({
                         {viewAllLink && (
                             <Link
                                 href={viewAllLink}
-                                className="text-xs sm:text-sm font-bold text-gray-700 hover:text-blue-600 transition flex items-center gap-1 shrink-0 ml-2"
+                                className="text-xs md:text-sm font-bold text-gray-700 hover:text-blue-600 transition flex items-center gap-1 shrink-0 ml-2"
                             >
                                 <span>View all</span>
                                 <Icon icon="solar:arrow-right-linear" width={14} />

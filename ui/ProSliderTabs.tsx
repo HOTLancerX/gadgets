@@ -24,7 +24,7 @@ export default function ProSliderTabs({
   if (!products || products.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-6 pt-2 scroll-smooth">
+    <div className="flex items-center gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-6 pt-2 scroll-smooth">
       {products.map((prod, idx) => {
         const isActive = activeTabIdx === idx;
         const isComingSoon = prod.badge?.toLowerCase().includes('coming');
@@ -41,12 +41,12 @@ export default function ProSliderTabs({
             }`}
           >
             {/* Product Thumbnail */}
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg overflow-hidden bg-white/70 p-0.5 shrink-0 flex items-center justify-center">
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg overflow-hidden p-0.5 shrink-0 flex items-center justify-center">
               {prod.thumbnail || prod.mainImage ? (
                 <img
                   src={prod.thumbnail || prod.mainImage}
                   alt={prod.title}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain mix-blend-multiply brightness-105"
                   loading="lazy"
                 />
               ) : (

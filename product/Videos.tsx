@@ -50,7 +50,7 @@ export default function GadgetsVideos({ videos = [], productTitle }: GadgetsVide
     return (
         <section
             id="product-videos"
-            className="bg-white rounded-3xl border border-gray-200/80 p-5 sm:p-8 shadow-xs space-y-6"
+            className="bg-white rounded-3xl border border-gray-200/80 p-5 md:p-8 shadow-xs space-y-6"
         >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-100 pb-4 gap-3 flex-wrap">
@@ -60,7 +60,7 @@ export default function GadgetsVideos({ videos = [], productTitle }: GadgetsVide
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h2 className="text-lg sm:text-xl font-black text-gray-900 tracking-tight">
+                            <h2 className="text-lg md:text-xl font-black text-gray-900 tracking-tight">
                                 Product Videos & Reviews
                             </h2>
                             <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[11px] font-bold">
@@ -75,7 +75,7 @@ export default function GadgetsVideos({ videos = [], productTitle }: GadgetsVide
             </div>
 
             {/* Video Grid: 4 columns on desktop/tablet, 2 columns on mobile */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 md:gap-4">
                 {videos.map((vid, idx) => {
                     const thumbUrl = `https://img.youtube.com/vi/${vid.videoid}/hqdefault.jpg`;
 
@@ -106,7 +106,7 @@ export default function GadgetsVideos({ videos = [], productTitle }: GadgetsVide
 
                                 {/* Centered Play Button */}
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-red-600/90 hover:bg-red-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                    <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-red-600/90 hover:bg-red-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                                         <Icon icon="solar:play-bold" width={18} className="ml-0.5" />
                                     </div>
                                 </div>
@@ -121,7 +121,7 @@ export default function GadgetsVideos({ videos = [], productTitle }: GadgetsVide
                             {/* Title Underneath Thumbnail */}
                             <div className="pt-2 px-0.5">
                                 <p
-                                    className="text-xs sm:text-sm font-bold text-gray-800 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors"
+                                    className="text-xs md:text-sm font-bold text-gray-800 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors"
                                     title={vid.title}
                                 >
                                     {vid.title || `Product Video ${idx + 1}`}
@@ -135,20 +135,20 @@ export default function GadgetsVideos({ videos = [], productTitle }: GadgetsVide
             {/* Interactive Video Popup Modal */}
             {activeVideo && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fade-in"
+                    className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex items-center justify-center p-3 md:p-6 animate-fade-in"
                     onClick={() => setActiveVideo(null)}
                 >
                     <div
-                        className="relative w-full max-w-3xl bg-neutral-950 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-neutral-800 flex flex-col"
+                        className="relative w-full max-w-3xl bg-neutral-950 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border border-neutral-800 flex flex-col"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-3.5 sm:p-4 bg-neutral-900 border-b border-neutral-800 gap-3">
+                        <div className="flex items-center justify-between p-3.5 md:p-4 bg-neutral-900 border-b border-neutral-800 gap-3">
                             <div className="flex items-center gap-2.5 min-w-0">
                                 <div className="w-7 h-7 rounded-xl bg-red-600/20 text-red-500 flex items-center justify-center shrink-0">
                                     <Icon icon="logos:youtube-icon" width={16} />
                                 </div>
-                                <h3 className="text-xs sm:text-sm font-bold text-neutral-100 truncate">
+                                <h3 className="text-xs md:text-sm font-bold text-neutral-100 truncate">
                                     {activeVideo.title}
                                 </h3>
                             </div>

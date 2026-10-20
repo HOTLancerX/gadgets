@@ -182,10 +182,10 @@ export default function GadgetsFrequencyTogether({
                 {/* ── Section Header ── */}
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
+                        <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">
                             Complete Your Setup
                         </h2>
-                        <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">
+                        <p className="text-xs text-gray-500 mt-0.5 hidden md:block">
                             Recommended accessories & essentials compatible with {currentProductTitle}
                         </p>
                     </div>
@@ -199,7 +199,7 @@ export default function GadgetsFrequencyTogether({
                 </div>
 
                 {/* ── 4-Column Horizontal Cards Grid (2 rows of 4) ── */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {products.map((item) => {
                         const inCartQty = cartCounts[String(item.id)] || 0;
                         const isVariant =
@@ -215,7 +215,7 @@ export default function GadgetsFrequencyTogether({
                                 {/* Left: Product Thumbnail */}
                                 <Link
                                     href={item.url}
-                                    className="w-20 h-20 sm:w-22 sm:h-22 rounded-xl bg-gray-50/50 p-1 shrink-0 flex items-center justify-center overflow-hidden border border-gray-100"
+                                    className="w-20 h-20 md:w-22 md:h-22 rounded-xl bg-gray-50/50 p-1 shrink-0 flex items-center justify-center overflow-hidden border border-gray-100"
                                 >
                                     {item.image ? (
                                         <img
@@ -243,14 +243,14 @@ export default function GadgetsFrequencyTogether({
                                         {/* Product Title */}
                                         <Link
                                             href={item.url}
-                                            className="text-xs sm:text-sm font-bold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 mt-1 leading-snug"
+                                            className="text-xs md:text-sm font-bold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 mt-1 leading-snug"
                                             title={item.title}
                                         >
                                             {item.title}
                                         </Link>
 
                                         {/* Price */}
-                                        <p className="text-xs sm:text-sm font-extrabold mt-1">
+                                        <p className="text-xs md:text-sm font-extrabold mt-1">
                                             {isVariant && (
                                                 <span className="text-[11px] text-gray-400 font-normal mr-1">
                                                     From

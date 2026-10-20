@@ -560,18 +560,18 @@ export default function GadgetsCategoryLayout({
 
     return (
         <div className="min-h-screen bg-[#fafbfc] text-[#111827] antialiased">
-            <div className="container py-6 sm:py-8">
+            <div className="container py-6 md:py-8">
 
                 {/* ── Top Header Row: Category Title & Breadcrumb Chain ── */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6 pb-2">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#111827] tracking-tight">
+                        <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-[#111827] tracking-tight">
                             {data.title}
                         </h1>
                     </div>
 
                     {/* Breadcrumbs matching screenshot */}
-                    <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 flex-wrap">
+                    <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs md:text-sm text-gray-500 flex-wrap">
                         <Link href="/" className="text-[#0066cc] hover:underline font-medium transition-colors">
                             Home
                         </Link>
@@ -606,7 +606,7 @@ export default function GadgetsCategoryLayout({
                             <button
                                 type="button"
                                 onClick={() => setMobileFilterOpen(true)}
-                                className="lg:hidden inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-gray-200 rounded-xl text-xs sm:text-sm font-semibold text-gray-800 shadow-2xs hover:bg-gray-50 cursor-pointer"
+                                className="lg:hidden inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-gray-200 rounded-xl text-xs md:text-sm font-semibold text-gray-800 shadow-2xs hover:bg-gray-50 cursor-pointer"
                             >
                                 <Icon icon="solar:filter-linear" width={16} />
                                 <span>Filters</span>
@@ -618,7 +618,7 @@ export default function GadgetsCategoryLayout({
                             </button>
                         )}
 
-                        <p className="text-xs sm:text-sm text-gray-500 font-normal">
+                        <p className="text-xs md:text-sm text-gray-500 font-normal">
                             {totalProductsCount === 0 ? (
                                 'No results'
                             ) : totalPages > 1 ? (
@@ -638,7 +638,7 @@ export default function GadgetsCategoryLayout({
                     {/* Sort selector (controlled by sortEnabled) */}
                     {sortEnabled && (
                         <div className="flex items-center gap-2">
-                            <label htmlFor="category-sort-select" className="text-xs sm:text-sm font-medium text-gray-500 hidden sm:inline-block">
+                            <label htmlFor="category-sort-select" className="text-xs md:text-sm font-medium text-gray-500 hidden md:inline-block">
                                 Sort by:
                             </label>
                             <div className="relative">
@@ -646,7 +646,7 @@ export default function GadgetsCategoryLayout({
                                     id="category-sort-select"
                                     value={currentSort}
                                     onChange={(e) => handleSortChange(e.target.value)}
-                                    className="appearance-none bg-white border border-gray-200 hover:border-gray-300 text-xs sm:text-sm font-semibold text-gray-800 py-2 pl-3.5 pr-8 rounded-xl shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] cursor-pointer transition-colors"
+                                    className="appearance-none bg-white border border-gray-200 hover:border-gray-300 text-xs md:text-sm font-semibold text-gray-800 py-2 pl-3.5 pr-8 rounded-xl shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] cursor-pointer transition-colors"
                                 >
                                     <option value="newest">New Arrivals</option>
                                     <option value="price_asc">Price: Low to High</option>
@@ -796,8 +796,8 @@ export default function GadgetsCategoryLayout({
 
                         {/* ── Pagination Controls (?page=1, ?page=2, ...) ── */}
                         {totalPages > 1 && (
-                            <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-100">
-                                <p className="text-xs sm:text-sm text-gray-500 font-medium">
+                            <div className="mt-10 flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-100">
+                                <p className="text-xs md:text-sm text-gray-500 font-medium">
                                     Showing <span className="font-semibold text-gray-800">{startIndex + 1}</span> to{' '}
                                     <span className="font-semibold text-gray-800">
                                         {Math.min(startIndex + pageSize, totalProductsCount)}
@@ -812,10 +812,10 @@ export default function GadgetsCategoryLayout({
                                         onClick={() => handlePageChange(safeCurrentPage - 1)}
                                         disabled={safeCurrentPage <= 1}
                                         aria-label="Previous page"
-                                        className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 shadow-2xs"
+                                        className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs md:text-sm font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 shadow-2xs"
                                     >
                                         <Icon icon="solar:alt-arrow-left-linear" width={16} />
-                                        <span className="hidden sm:inline">Prev</span>
+                                        <span className="hidden md:inline">Prev</span>
                                     </button>
 
                                     {/* Page Number Buttons */}
@@ -824,7 +824,7 @@ export default function GadgetsCategoryLayout({
                                             return (
                                                 <span
                                                     key={`dots-${idx}`}
-                                                    className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-gray-400 text-xs sm:text-sm select-none"
+                                                    className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-gray-400 text-xs md:text-sm select-none"
                                                 >
                                                     …
                                                 </span>
@@ -838,7 +838,7 @@ export default function GadgetsCategoryLayout({
                                                 type="button"
                                                 onClick={() => handlePageChange(pageNum)}
                                                 aria-current={isActive ? 'page' : undefined}
-                                                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center transition-all cursor-pointer ${
+                                                className={`w-9 h-9 md:w-10 md:h-10 rounded-xl text-xs md:text-sm font-bold flex items-center justify-center transition-all cursor-pointer ${
                                                     isActive
                                                         ? 'bg-[#0053e2] text-white shadow-sm ring-2 ring-[#0053e2]/20'
                                                         : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 shadow-2xs'
@@ -855,9 +855,9 @@ export default function GadgetsCategoryLayout({
                                         onClick={() => handlePageChange(safeCurrentPage + 1)}
                                         disabled={safeCurrentPage >= totalPages}
                                         aria-label="Next page"
-                                        className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 shadow-2xs"
+                                        className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs md:text-sm font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 shadow-2xs"
                                     >
-                                        <span className="hidden sm:inline">Next</span>
+                                        <span className="hidden md:inline">Next</span>
                                         <Icon icon="solar:alt-arrow-right-linear" width={16} />
                                     </button>
                                 </nav>
@@ -868,9 +868,9 @@ export default function GadgetsCategoryLayout({
 
                 {/* ── Bottom Section: Category Description ── */}
                 {data.description && (
-                    <div className="mt-12 p-6 sm:p-8 bg-white rounded-2xl border border-gray-100 shadow-2xs">
+                    <div className="mt-12 p-6 md:p-8 bg-white rounded-2xl border border-gray-100 shadow-2xs">
                         <div
-                            className="prose prose-gray max-w-none text-gray-700 leading-relaxed text-sm sm:text-base"
+                            className="prose prose-gray max-w-none text-gray-700 leading-relaxed text-sm md:text-base"
                             dangerouslySetInnerHTML={{ __html: data.description }}
                         />
                     </div>
@@ -1036,7 +1036,7 @@ function GadgetProductCard({
                     {/* Product Title */}
                     <Link
                         href={productUrl}
-                        className="block text-sm sm:text-base font-bold text-gray-900 line-clamp-1 group-hover:text-[#0053e2] transition-colors mb-1.5"
+                        className="block text-sm md:text-base font-bold text-gray-900 line-clamp-1 group-hover:text-[#0053e2] transition-colors mb-1.5"
                         title={product.title}
                     >
                         {product.title}
@@ -1045,7 +1045,7 @@ function GadgetProductCard({
                     {/* Price Row matching screenshot */}
                     <div className="flex items-baseline gap-2 flex-wrap mb-3">
                         {priceType === 'variant' && variants.length > 0 ? (
-                            <span className="text-sm sm:text-base font-bold text-gray-900 tracking-tight">
+                            <span className="text-sm md:text-base font-bold text-gray-900 tracking-tight">
                                 {minVariantPrice === maxVariantPrice ? (
                                     `${currencySymbol} ${fmtPrice(minVariantPrice)}`
                                 ) : (
@@ -1054,15 +1054,15 @@ function GadgetProductCard({
                             </span>
                         ) : hasDiscount ? (
                             <>
-                                <span className="text-xs sm:text-sm text-gray-400 line-through font-normal">
+                                <span className="text-xs md:text-sm text-gray-400 line-through font-normal">
                                     {currencySymbol} {fmtPrice(regularPrice)}
                                 </span>
-                                <span className="text-sm sm:text-base font-bold text-[#e11d48] tracking-tight">
+                                <span className="text-sm md:text-base font-bold text-[#e11d48] tracking-tight">
                                     {currencySymbol} {fmtPrice(singleBasePrice)}
                                 </span>
                             </>
                         ) : (
-                            <span className="text-sm sm:text-base font-bold text-gray-900 tracking-tight">
+                            <span className="text-sm md:text-base font-bold text-gray-900 tracking-tight">
                                 {currencySymbol} {fmtPrice(singleBasePrice)}
                             </span>
                         )}
@@ -1079,7 +1079,7 @@ function GadgetProductCard({
                                 e.stopPropagation();
                                 onSelectOptions();
                             }}
-                            className="w-full py-2.5 px-4 bg-[#0053e2] hover:bg-[#0047c4] active:scale-[0.98] text-white font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-xs flex items-center justify-center cursor-pointer select-none"
+                            className="w-full py-2.5 px-4 bg-[#0053e2] hover:bg-[#0047c4] active:scale-[0.98] text-white font-semibold text-xs md:text-sm rounded-xl transition-all shadow-xs flex items-center justify-center cursor-pointer select-none"
                         >
                             Select options
                         </button>
@@ -1087,7 +1087,7 @@ function GadgetProductCard({
                         <button
                             type="button"
                             onClick={handleSingleAddToCart}
-                            className="w-full py-2.5 px-4 bg-[#0053e2] hover:bg-[#0047c4] active:scale-[0.98] text-white font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-xs flex items-center justify-center cursor-pointer select-none"
+                            className="w-full py-2.5 px-4 bg-[#0053e2] hover:bg-[#0047c4] active:scale-[0.98] text-white font-semibold text-xs md:text-sm rounded-xl transition-all shadow-xs flex items-center justify-center cursor-pointer select-none"
                         >
                             Add to cart
                         </button>

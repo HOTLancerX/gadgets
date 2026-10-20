@@ -271,7 +271,7 @@ export default function OfferAccordion({
                         e.stopPropagation();
                         handlePrev();
                     }}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/50 hover:bg-black/80 text-white/90 hover:text-white backdrop-blur-md flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer shadow-lg z-20 border border-white/10"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-full bg-black/50 hover:bg-black/80 text-white/90 hover:text-white backdrop-blur-md flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer shadow-lg z-20 border border-white/10"
                     aria-label="Previous image"
                 >
                     <Icon icon="solar:alt-arrow-left-bold" width={20} />
@@ -286,7 +286,7 @@ export default function OfferAccordion({
                         e.stopPropagation();
                         handleNext();
                     }}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/50 hover:bg-black/80 text-white/90 hover:text-white backdrop-blur-md flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer shadow-lg z-20 border border-white/10"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-full bg-black/50 hover:bg-black/80 text-white/90 hover:text-white backdrop-blur-md flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer shadow-lg z-20 border border-white/10"
                     aria-label="Next image"
                 >
                     <Icon icon="solar:alt-arrow-right-bold" width={20} />
@@ -301,7 +301,7 @@ export default function OfferAccordion({
                         e.stopPropagation();
                         setIsPlaying((prev) => !prev);
                     }}
-                    className="absolute right-6 bottom-5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/55 hover:bg-black/85 text-white/90 hover:text-white backdrop-blur-md flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer shadow-lg z-20 border border-white/10"
+                    className="absolute right-6 bottom-5 w-7 h-7 md:w-8 md:h-8 rounded-full bg-black/55 hover:bg-black/85 text-white/90 hover:text-white backdrop-blur-md flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer shadow-lg z-20 border border-white/10"
                     title={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
                     aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
                 >

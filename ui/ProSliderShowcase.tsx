@@ -51,7 +51,7 @@ export default function ProSliderShowcase({
   const productUrl = product.postUrl || `/product/${product.slug}`;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center pt-8 sm:pt-12">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center pt-8 md:pt-12">
       
       {/* ─── Left Column: Large Interactive Product Image ─── */}
       <div className="lg:col-span-6 flex items-center justify-center relative">
@@ -61,7 +61,7 @@ export default function ProSliderShowcase({
               key={currentImage}
               src={currentImage}
               alt={product.title}
-              className="max-h-115 w-auto object-contain transition-all duration-300 drop-shadow-xl hover:scale-102"
+              className="max-h-115 w-auto object-contain transition-all duration-300 hover:scale-102 mix-blend-multiply brightness-105"
               loading="lazy"
             />
           ) : (
@@ -89,7 +89,7 @@ export default function ProSliderShowcase({
           </div>
 
           {/* Product Full Title */}
-          <h3 className="text-2xl sm:text-3xl font-bold text-gray-950 tracking-tight leading-tight">
+          <h3 className="text-2xl md:text-3xl font-bold text-gray-950 tracking-tight leading-tight">
             {product.title}
           </h3>
         </div>
@@ -104,7 +104,7 @@ export default function ProSliderShowcase({
 
         {/* Subtitle / Tagline */}
         {product.subtitle && (
-          <p className="text-sm sm:text-base text-gray-500 font-medium">
+          <p className="text-sm md:text-base text-gray-500 font-medium">
             {product.subtitle}
           </p>
         )}
@@ -121,7 +121,7 @@ export default function ProSliderShowcase({
 
         {/* Price & Stock Status */}
         <div className="flex items-baseline gap-2">
-          <span className="text-lg sm:text-xl font-bold text-gray-950">
+          <span className="text-lg md:text-xl font-bold text-gray-950">
             {currencySymbol} {formattedPrice}
           </span>
           {product.stockStatus && (
@@ -135,7 +135,7 @@ export default function ProSliderShowcase({
         <div>
           <Link
             href={productUrl}
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-white text-sm sm:text-base font-bold shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-white text-sm md:text-base font-bold shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0"
             style={{ backgroundColor: accentColor }}
           >
             <span>{ctaText}</span>

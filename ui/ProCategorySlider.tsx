@@ -288,7 +288,7 @@ export default function ProCategorySlider({
 
     return (
         <section
-            className={`w-full select-none font-sans py-4 sm:py-6 ${sliderScope}`}
+            className={`w-full select-none font-sans py-4 md:py-6 ${sliderScope}`}
             style={{ margin, padding }}
         >
             {/* Scoped CSS for Dynamic Responsive Columns in One Line */}
@@ -329,10 +329,10 @@ export default function ProCategorySlider({
 
             <div className="w-full space-y-5">
                 {/* ── Header: Title on LEFT, Categories on RIGHT ── */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     {/* Left: Section Title */}
                     <div className="shrink-0">
-                        <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                        <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
                             <span>{titlePrefix}</span>
                             <span className="bg-linear-to-r from-orange-500 via-pink-500 to-purple-600 bg-clip-text text-transparent">
                                 {titleHighlight}
@@ -352,7 +352,7 @@ export default function ProCategorySlider({
                                             key={tab.id}
                                             type="button"
                                             onClick={() => setActiveTabId(tab.id)}
-                                            className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                                            className={`px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
                                                 isActive
                                                     ? 'bg-[#0f172a] text-white shadow-xs scale-102'
                                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
@@ -369,7 +369,7 @@ export default function ProCategorySlider({
                         {viewAllLink && (
                             <Link
                                 href={viewAllLink}
-                                className="text-xs sm:text-sm font-bold text-gray-700 hover:text-blue-600 transition flex items-center gap-1 shrink-0 ml-1"
+                                className="text-xs md:text-sm font-bold text-gray-700 hover:text-blue-600 transition flex items-center gap-1 shrink-0 ml-1"
                             >
                                 <span>View all</span>
                                 <Icon icon="solar:arrow-right-linear" width={14} />
@@ -383,7 +383,7 @@ export default function ProCategorySlider({
                                     type="button"
                                     onClick={scrollPrev}
                                     disabled={!canPrev}
-                                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition shadow-2xs cursor-pointer ${
+                                    className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center transition shadow-2xs cursor-pointer ${
                                         canPrev
                                             ? 'bg-gray-100 hover:bg-gray-200 text-gray-800 hover:scale-105 active:scale-95'
                                             : 'bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed opacity-50'
@@ -396,7 +396,7 @@ export default function ProCategorySlider({
                                     type="button"
                                     onClick={scrollNext}
                                     disabled={!canNext}
-                                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition shadow-xs cursor-pointer ${
+                                    className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center transition shadow-xs cursor-pointer ${
                                         canNext
                                             ? 'bg-[#0f172a] hover:bg-[#1e293b] text-white hover:scale-105 active:scale-95'
                                             : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-50'

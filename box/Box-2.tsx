@@ -337,7 +337,7 @@ export default function GadgetsBox2({
 
     return (
         <>
-            <div className="group relative flex flex-col justify-between w-full h-full bg-[#f3f4f6] rounded-2xl sm:rounded-3xl p-4 sm:p-5 select-none transition-all duration-300 hover:shadow-md">
+            <div className="group relative flex flex-col justify-between w-full h-full bg-[#f3f4f6] rounded-2xl md:rounded-3xl p-4 md:p-5 select-none transition-all duration-300 hover:shadow-md">
                 {/* ── Top Area: SALE Badge & Device Image ── */}
                 <div>
                     <div className="relative w-full flex items-center justify-between mb-2 min-h-5">
@@ -386,7 +386,7 @@ export default function GadgetsBox2({
                             type="button"
                             onClick={handleButtonClick}
                             disabled={!inStock}
-                            className="bg-[#0f172a] hover:bg-[#1e293b] active:scale-95 text-white text-xs sm:text-[13px] font-bold py-2.5 px-6 rounded-full shadow-xs transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="bg-[#0f172a] hover:bg-[#1e293b] active:scale-95 text-white text-xs md:text-[13px] font-bold py-2.5 px-6 rounded-full shadow-xs transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             {priceType === 'variant' && variants.length > 0
                                 ? 'Choose options'
@@ -401,7 +401,7 @@ export default function GadgetsBox2({
                     {/* Title */}
                     <Link
                         href={href}
-                        className="block text-sm sm:text-base font-bold text-gray-950 hover:text-blue-600 transition-colors truncate tracking-tight"
+                        className="block text-sm md:text-base font-bold text-gray-950 hover:text-blue-600 transition-colors truncate tracking-tight"
                         title={data?.title}
                     >
                         {data?.title}
@@ -410,11 +410,11 @@ export default function GadgetsBox2({
                     {/* Price Row */}
                     <div className="flex items-baseline gap-1.5 flex-wrap">
                         {priceType === 'variant' && (
-                            <span className="text-xs sm:text-sm text-gray-400 font-normal">
+                            <span className="text-xs md:text-sm text-gray-400 font-normal">
                                 From
                             </span>
                         )}
-                        <span className="text-sm sm:text-base font-extrabold text-gray-950 tracking-tight">
+                        <span className="text-sm md:text-base font-extrabold text-gray-950 tracking-tight">
                             {currencySymbol} {fmtPrice(displayPrice)}
                         </span>
                     </div>
@@ -433,7 +433,7 @@ export default function GadgetsBox2({
                                             e.stopPropagation();
                                             handleColorClick(swatch);
                                         }}
-                                        className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full transition-all duration-200 cursor-pointer border ${
+                                        className={`w-4 h-4 md:w-5 md:h-5 rounded-full transition-all duration-200 cursor-pointer border ${
                                             isCurrent
                                                 ? 'ring-2 ring-gray-950 ring-offset-2 scale-110 border-transparent'
                                                 : 'border-black/10 hover:scale-110'

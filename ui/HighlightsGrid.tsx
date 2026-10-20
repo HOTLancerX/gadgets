@@ -128,14 +128,14 @@ export default function HighlightsGrid({
 
     return (
         <section
-            className="w-full select-none font-sans py-4 sm:py-6"
+            className="w-full select-none font-sans py-4 md:py-6"
             style={{ margin, padding }}
         >
-            <div className="w-full space-y-4 sm:space-y-6">
+            <div className="w-full space-y-4 md:space-y-6">
                 {/* ── Section Title ── */}
                 {(titlePrefix || titleHighlight) && (
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <h2 className="text-xl md:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
                             {titlePrefix && <span>{titlePrefix}</span>}
                             {titleHighlight && (
                                 <span className="text-[#f97316]">
@@ -174,7 +174,7 @@ export default function HighlightsGrid({
                                 {/* Optional Badge / Caption at top or bottom if title exists */}
                                 {item.title && (
                                     <div className="absolute top-3 left-3 right-3 z-10">
-                                        <span className="text-[11px] sm:text-xs font-semibold text-white/90 drop-shadow-md uppercase tracking-wider line-clamp-1">
+                                        <span className="text-[11px] md:text-xs font-semibold text-white/90 drop-shadow-md uppercase tracking-wider line-clamp-1">
                                             {item.title}
                                         </span>
                                     </div>
@@ -182,10 +182,10 @@ export default function HighlightsGrid({
 
                                 {/* Centered Translucent Glass Play Button */}
                                 <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/35 backdrop-blur-md border border-white/40 flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-115 group-hover:bg-white/45">
+                                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/35 backdrop-blur-md border border-white/40 flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-115 group-hover:bg-white/45">
                                         <Icon
                                             icon="solar:play-bold"
-                                            className="w-4 h-4 sm:w-5 sm:h-5 text-white ml-0.5 drop-shadow"
+                                            className="w-4 h-4 md:w-5 md:h-5 text-white ml-0.5 drop-shadow"
                                         />
                                     </div>
                                 </div>
@@ -231,7 +231,7 @@ export default function HighlightsGrid({
                         </div>
 
                         {/* Modal Video Player */}
-                        <div className="relative aspect-9/16 sm:aspect-video w-full bg-black flex items-center justify-center">
+                        <div className="relative aspect-9/16 md:aspect-video w-full bg-black flex items-center justify-center">
                             {activeVideo.url.includes('youtube.com') || activeVideo.url.includes('youtu.be') ? (
                                 <iframe
                                     src={activeVideo.url.replace('watch?v=', 'embed/')}

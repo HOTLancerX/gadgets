@@ -139,7 +139,7 @@ export default function SearchGadgets({
   return (
     <div ref={ref} className={`relative w-full ${className}`}>
       <form onSubmit={handleSubmit} className="w-full">
-        <div className="flex items-center bg-white rounded-full border-2 border-[#0066cc] overflow-hidden focus-within:shadow-md transition-all h-10 sm:h-10.5">
+        <div className="flex items-center bg-white rounded-full border-2 border-[#0066cc] overflow-hidden focus-within:shadow-md transition-all h-10 md:h-10.5">
           {/* Search Icon */}
           <div className="pl-3.5 pr-1.5 flex items-center justify-center text-gray-500">
             <Icon icon="solar:magnifer-linear" width={18} height={18} />
@@ -154,7 +154,7 @@ export default function SearchGadgets({
               if (hasData) setOpen(true);
             }}
             placeholder={placeholder}
-            className="w-full outline-none text-xs sm:text-sm text-gray-800 placeholder-gray-400 bg-transparent px-2"
+            className="w-full outline-none text-xs md:text-sm text-gray-800 placeholder-gray-400 bg-transparent px-2"
             autoComplete="off"
           />
 
@@ -181,7 +181,7 @@ export default function SearchGadgets({
           {/* Golden SEARCH Button */}
           <button
             type="submit"
-            className="bg-[#ffb800] hover:bg-[#f0ad00] active:scale-[0.98] text-gray-950 font-bold text-xs uppercase px-5 sm:px-7 h-full flex items-center justify-center tracking-wider shrink-0 transition-colors cursor-pointer select-none"
+            className="bg-[#ffb800] hover:bg-[#f0ad00] active:scale-[0.98] text-gray-950 font-bold text-xs uppercase px-5 md:px-7 h-full flex items-center justify-center tracking-wider shrink-0 transition-colors cursor-pointer select-none"
           >
             SEARCH
           </button>
