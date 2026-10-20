@@ -21,7 +21,6 @@ import dynamic from 'next/dynamic';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import MobileDrawer from '@/components/page/header/MobileDrawer';
-import SearchPopUp from '@/components/SearchPopUp';
 import SearchGadgets from './SearchGadgets';
 import AccountGadgets from './AccountGadgets';
 import useSettings from '@/lib/useSettings';
@@ -126,51 +125,34 @@ export default function HeaderGadgets({
     <header
       className={`z-50 w-full transition-all duration-200 bg-white ${
         isSticky ? 'sticky top-0' : 'relative'
-      } ${scrolled ? 'shadow-md' : 'shadow-xs'}`}
+      } ${scrolled ? 'shadow-md' : ''}`}
       onMouseLeave={handleMouseLeave}
     >
       {/* ── 1. MAIN TOP HEADER ROW ── */}
       <div className="border-b border-gray-100 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-4 lg:gap-8">
-          
+        <div className="container py-2 grid grid-cols-2 md:grid-cols-4 gap-2">
           {/* Logo on Left */}
-          <Link href="/" className="shrink-0 flex items-center gap-2 no-underline select-none">
-            {settings.logo ? (
-              <img
-                src={settings.logo}
-                alt={settings.siteName || 'Exelic Gadgets'}
-                className={
-                  settings.header_logo_height || settings.headerLogoHeight
-                    ? 'w-auto object-contain'
-                    : 'h-9 sm:h-10 w-auto object-contain'
-                }
-                style={{
-                  height: settings.header_logo_height
-                    ? `${settings.header_logo_height}px`
-                    : settings.headerLogoHeight
-                    ? `${settings.headerLogoHeight}px`
-                    : undefined,
-                }}
+          <div className='flex items-center'>
+            <div className='md:hidden md:mr-0 mr-2'>
+              <MobileDrawer
+                items={mobileItems.length > 0 ? mobileItems : (items as any)}
+                settings={settings}
+                iconColor="text-main"
               />
-            ) : (
-              <div className="flex items-center gap-2">
-                {/* Custom Golden Loop Logo matching Exelic Gadgets */}
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-linear-to-br from-amber-400 to-amber-500 flex items-center justify-center p-1.5 shadow-xs shrink-0">
-                  <svg viewBox="0 0 40 40" fill="none" className="w-full h-full text-white">
-                    <circle cx="16" cy="20" r="9" stroke="white" strokeWidth="3.5" fill="none" />
-                    <circle cx="24" cy="20" r="9" stroke="white" strokeWidth="3.5" fill="none" />
-                  </svg>
-                </div>
-                <div className="flex items-baseline font-black tracking-tight text-xl sm:text-2xl font-sans">
-                  <span className="text-[#f5a623] mr-1">Exelic</span>
-                  <span className="text-[#0053e2]">Gadgets</span>
-                </div>
-              </div>
-            )}
-          </Link>
+            </div>
+            {settings.logo ? (
+              <Link href="/" className="shrink-0 flex items-center gap-2 no-underline select-none">
+                <img
+                  src={settings.logo}
+                  alt={settings.siteName || 'Gadgets'}
+                  className={'h-6 md:h-10 w-auto object-contain'}
+                />
+              </Link>
+            ) : null}
+          </div>
 
           {/* Centered Pill Search Bar (Desktop) */}
-          <div className="hidden md:flex flex-1 max-w-2xl mx-auto">
+          <div className="order-2 md:order-0 col-span-2">
             <SearchGadgets
               type="product"
               currencySymbol={currencySymbol}
@@ -179,7 +161,7 @@ export default function HeaderGadgets({
           </div>
 
           {/* Right Action Icons: Account & Cart (Desktop + Mobile) */}
-          <div className="flex items-center gap-4 sm:gap-6 shrink-0">
+          <div className="flex items-center justify-end gap-4 shrink-0">
             {/* Account Component */}
             <AccountGadgets color={brandColor} />
 
@@ -188,7 +170,7 @@ export default function HeaderGadgets({
               trigger={(open, count) => (
                 <button
                   onClick={open}
-                  className="flex flex-col items-center justify-center group cursor-pointer focus:outline-hidden"
+                  className="flex flex-col items-center justify-center group cursor-pointer focus:outline-hidden mr-2"
                   title="Shopping Cart"
                   aria-label="Shopping Cart"
                 >
@@ -198,7 +180,7 @@ export default function HeaderGadgets({
                       className="w-6 h-6 group-hover:scale-105 transition-transform"
                       style={{ color: brandColor }}
                     />
-                    <span className="absolute -top-1.5 right-0 bg-[#ffb800] text-gray-950 text-[10px] font-black rounded-full min-w-4 h-4 px-1 flex items-center justify-center leading-none shadow-xs">
+                    <span className="absolute -top-1.5 -right-2 bg-[#ffb800] text-gray-950 text-[10px] font-black rounded-full min-w-4 h-4 px-1 flex items-center justify-center leading-none shadow-xs">
                       {count > 99 ? '99+' : count}
                     </span>
                   </div>
@@ -208,29 +190,13 @@ export default function HeaderGadgets({
                 </button>
               )}
             />
-
-            {/* Mobile Search PopUp & Mobile Drawer Trigger */}
-            <div className="flex items-center gap-1.5 md:hidden">
-              <SearchPopUp
-                type="product"
-                fontSize={22}
-                iconColor={brandColor}
-                currencySymbol={currencySymbol}
-              />
-              <MobileDrawer
-                items={mobileItems.length > 0 ? mobileItems : (items as any)}
-                settings={settings}
-                iconColor={brandColor}
-              />
-            </div>
           </div>
-
         </div>
       </div>
 
       {/* ── 2. HORIZONTAL CATEGORY NAVIGATION & PHONE SUPPORT ROW ── */}
       <nav className="hidden md:block bg-white border-b border-gray-200 relative select-none">
-        <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
+        <div className="container flex items-center justify-between">
           
           {/* Left Category Links */}
           <div className="flex items-center space-x-1 lg:space-x-3 overflow-x-auto no-scrollbar py-0.5">

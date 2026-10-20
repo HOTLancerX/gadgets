@@ -210,7 +210,7 @@ export default function GadgetsFrequencyTogether({
                         return (
                             <div
                                 key={item.id}
-                                className="bg-white rounded-2xl border border-gray-200/90 p-4 flex items-center gap-3.5 hover:border-gray-300 hover:shadow-xs transition-all shadow-2xs group"
+                                className="bg-white rounded-2xl border border-gray-200/90 p-2 md:p-4 flex items-center gap-3.5 hover:border-gray-300 hover:shadow-xs transition-all shadow-2xs group"
                             >
                                 {/* Left: Product Thumbnail */}
                                 <Link
