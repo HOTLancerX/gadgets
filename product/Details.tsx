@@ -574,8 +574,8 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
                             </div>
 
                             {/* Price Card */}
-                            <div className="p-4 rounded-2xl bg-linear-to-r from-blue-50/70 via-indigo-50/40 to-slate-50 border border-blue-100 flex items-baseline gap-3 flex-wrap shadow-2xs">
-                                <span className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight">
+                            <div className="flex items-baseline gap-3 flex-wrap">
+                                <span className="text-3xl md:text-4xl font-bold text-main tracking-tight">
                                     {currencySymbol} {Number(currentPrice).toLocaleString()}
                                 </span>
                                 {isDiscounted && (
@@ -865,7 +865,7 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
                 )}
 
                 {/* ─── 5. AUTOMATIC COMPARE COMPONENT ─── */}
-                {parsedCompareCandidates.length > 0 && (
+                {validSpecifications.length > 0 && parsedCompareCandidates.length > 0 && (
                     <GadgetsCompare
                         currentProduct={currentCompareItem}
                         compareProducts={parsedCompareCandidates}

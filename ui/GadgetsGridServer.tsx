@@ -109,7 +109,7 @@ export default function GadgetsGridServer({ schema }: { schema: any }) {
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="h-full w-full object-contain drop-shadow-xs"
+                      className="h-full w-full object-contain drop-shadow-xs mix-blend-multiply brightness-105"
                       loading="lazy"
                     />
                   ) : (

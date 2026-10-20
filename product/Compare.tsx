@@ -126,8 +126,27 @@ export default function GadgetsCompare({
         return () => clearTimeout(timer);
     }, [notice]);
 
-    // Hide section entirely if there are no comparison products and no available candidates
-    if (activeComparedProducts.length === 0 && availablePool.length === 0) {
+    // ── Hide compare section entirely if the current product has no specifications ──
+    const hasCurrentSpecs = useMemo(() => {
+        if (!Array.isArray(currentProduct?.specifications) || currentProduct.specifications.length === 0) {
+            return false;
+        }
+        return currentProduct.specifications.some((box) =>
+            Array.isArray(box.fields) &&
+            box.fields.some((f) => typeof f?.description === "string" && f.description.trim().length > 0)
+        );
+    }, [currentProduct?.specifications]);
+
+    const [slotSearches, setSlotSearches] = useState<Record<number, string>>({});
+
+    const getSlotFilteredProducts = (query: string) => {
+        if (!query.trim()) return availablePool;
+        const q = query.toLowerCase().trim();
+        return availablePool.filter((p) => p.title.toLowerCase().includes(q));
+    };
+
+    // Hide section entirely if current product has no specs or no products to compare
+    if (!hasCurrentSpecs || (activeComparedProducts.length === 0 && availablePool.length === 0)) {
         return null;
     }
 
@@ -314,27 +333,105 @@ export default function GadgetsCompare({
                     </div>
                 ))}
 
-                {/* 3. Empty / Add Device Slots (strictly maintains 4 equal cards in the grid) */}
-                {Array.from({ length: Math.max(0, 3 - activeComparedProducts.length) }).map((_, slotIdx) => (
-                    <div
-                        key={`empty-slot-${slotIdx}`}
-                        onClick={() => setIsSearchOpen(true)}
-                        className="rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-500 bg-gray-50/50 hover:bg-blue-50/20 p-5 flex flex-col items-center justify-center text-center transition-all cursor-pointer min-h-80 group shadow-2xs"
-                    >
-                        <div className="w-14 h-14 rounded-2xl bg-white border border-gray-200 text-gray-400 group-hover:text-blue-600 group-hover:border-blue-300 group-hover:scale-110 shadow-xs flex items-center justify-center transition-all mb-3">
-                            <Icon icon="solar:add-circle-linear" width={30} />
+                {/* 3. Empty / Add Device Slots (Inline search box sits directly in the slot) */}
+                {Array.from({ length: Math.max(0, 3 - activeComparedProducts.length) }).map((_, slotIdx) => {
+                    const query = slotSearches[slotIdx] || "";
+                    const slotFiltered = getSlotFilteredProducts(query);
+
+                    return (
+                        <div
+                            key={`empty-slot-${slotIdx}`}
+                            className="bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-300 p-4 flex flex-col justify-between shadow-2xs min-h-80 transition-all"
+                        >
+                            <div className="flex flex-col h-full">
+                                {/* Slot Header */}
+                                <div className="flex items-center gap-2 mb-2.5 pb-2 border-b border-gray-100">
+                                    <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                        <Icon icon="solar:magnifer-linear" width={16} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h4 className="text-xs font-bold text-gray-900 truncate">
+                                            Add Device
+                                        </h4>
+                                        <p className="text-[11px] text-gray-400 truncate">
+                                            Search model to compare
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Inline Search Input */}
+                                <div className="relative mb-2.5">
+                                    <Icon
+                                        icon="solar:magnifer-linear"
+                                        width={14}
+                                        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={query}
+                                        onChange={(e) =>
+                                            setSlotSearches((prev) => ({ ...prev, [slotIdx]: e.target.value }))
+                                        }
+                                        placeholder="Search device name..."
+                                        className="w-full text-xs pl-8 pr-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-blue-600 focus:border-blue-600 text-gray-900 transition"
+                                    />
+                                </div>
+
+                                {/* Scrollable Device Candidate List */}
+                                <div className="flex-1 overflow-y-auto max-h-52 divide-y divide-gray-100 pr-0.5 space-y-1">
+                                    {slotFiltered.length === 0 ? (
+                                        <div className="py-8 text-center text-xs text-gray-400">
+                                            No additional devices found.
+                                        </div>
+                                    ) : (
+                                        slotFiltered.map((p) => (
+                                            <div
+                                                key={p.id}
+                                                onClick={() => {
+                                                    handleAddProduct(p);
+                                                    setSlotSearches((prev) => ({ ...prev, [slotIdx]: "" }));
+                                                }}
+                                                className="pt-1.5 pb-1 px-1 rounded-lg hover:bg-blue-50/50 flex items-center justify-between gap-2 cursor-pointer transition group"
+                                            >
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <div className="w-8 h-8 rounded-lg border border-gray-200 p-0.5 shrink-0 bg-white flex items-center justify-center overflow-hidden">
+                                                        {p.image ? (
+                                                            <img
+                                                                src={p.image}
+                                                                alt={p.title}
+                                                                className="w-full h-full object-contain"
+                                                            />
+                                                        ) : (
+                                                            <Icon
+                                                                icon="solar:devices-linear"
+                                                                width={14}
+                                                                className="text-gray-300"
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-xs font-semibold text-gray-800 truncate group-hover:text-blue-600">
+                                                            {p.title}
+                                                        </p>
+                                                        <p className="text-[10px] font-bold text-red-600">
+                                                            {currencySymbol} {Number(p.price || 0).toLocaleString()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="px-2 py-1 bg-blue-50 group-hover:bg-blue-600 text-blue-600 group-hover:text-white rounded-lg text-[10px] font-bold transition shrink-0 cursor-pointer"
+                                                >
+                                                    + Add
+                                                </button>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        <h4 className="text-sm font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
-                            Add Device
-                        </h4>
-                        <p className="text-xs text-gray-400 mt-1 max-w-45">
-                            Compare another model with this product
-                        </p>
-                        <span className="mt-4 px-3.5 py-1.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-xs font-semibold group-hover:border-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-2xs">
-                            + Select Device
-                        </span>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* ── Search / Add Device Modal ── */}
