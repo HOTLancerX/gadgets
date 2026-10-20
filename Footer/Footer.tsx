@@ -139,11 +139,11 @@ export default function FooterGadgets({
   const settings = propSettings && Object.keys(propSettings).length > 0 ? propSettings : hookSettings;
 
   const currentYear = new Date().getFullYear();
-  const siteName = settings.siteName || settings.site_title || 'Exelic Gadgets';
+  const siteName = settings.siteName || settings.site_title || '';
   const logo = settings.footer_logo || settings.logo || '';
   const logoHeight = settings.footer_logo_height || settings.footerLogoHeight || '';
 
-  const aboutTitle = settings.footer_about_title || 'About Our Organization';
+  const aboutTitle = settings.footer_about_title || '';
   const aboutDescription =
     settings.footer_about_description ||
     settings.footer_description ||
@@ -171,6 +171,7 @@ export default function FooterGadgets({
   const textColor1 = settings.footer_text_color || settings.footer_text_1 || '#1e293b';
   const textColor2 = settings.footer_text_color_2 || settings.footer_text_2 || '#64748b';
   const bgImage = settings.background_image || settings.backgroundImage || settings.bg_image || '';
+  const footerNumber = settings.footer_number || '';
 
   // ── 1. Dynamic Footer Sections (from Settings > Footer) ──
   const dynamicSections = useMemo(() => {
@@ -291,11 +292,11 @@ export default function FooterGadgets({
       }}
     >
       {/* ════════════════════ 1. MIDDLE INFORMATION BAR (DYNAMIC) ════════════════════ */}
-      <div className="container mx-auto px-4 md:px-6 py-10 md:py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
+      <div className="container py-10 md:py-12">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-2 md:gap-4">
           
           {/* ── Brand & About Column ── */}
-          <div className="lg:col-span-4 space-y-4">
+          <div className="col-span-2 space-y-4">
             <Link href="/" className="inline-flex items-center gap-2 select-none">
               {logo ? (
                 <img
@@ -359,50 +360,27 @@ export default function FooterGadgets({
                 </div>
               )}
 
-              {address && (
-                <div className="flex items-start gap-2 pt-0.5">
-                  <Icon icon="solar:map-point-linear" className="w-4 h-4 text-[#ffb800] shrink-0 mt-0.5" />
-                  <span style={{ color: textColor2 }} className="leading-relaxed">
-                    {address}
-                  </span>
-                </div>
-              )}
-
-              {(admin || editor) && (
-                <div className="flex items-center gap-3 pt-1 text-[11px]" style={{ color: textColor2 }}>
-                  {admin && <span>Admin: <strong style={{ color: textColor1 }}>{admin}</strong></span>}
-                  {editor && <span>Editor: <strong style={{ color: textColor1 }}>{editor}</strong></span>}
-                </div>
-              )}
-
-              {mobileDownload && (
-                <div className="pt-2">
-                  <a
-                    href={mobileDownload}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold hover:opacity-90 transition"
-                    style={{ borderColor: textColor2, color: textColor1 }}
-                  >
-                    <Icon icon="solar:smartphone-bold" width={14} />
-                    <span>Download Mobile App</span>
-                  </a>
-                </div>
-              )}
+              
             </div>
+          </div>
+
+          <div className="md:flex flex-col space-y-2 hidden ">
+            <h4 className="text-xs md:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>Store Locations</h4>
+            {admin && <strong className='text-sm' style={{ color: textColor1 }}>{admin}</strong>}
+            {address && (
+              <span style={{ color: textColor2 }} className="text-xs">
+                {address}
+              </span>
+            )}
+            {footerNumber && <span className='text-xs' style={{ color: textColor1 }}>{footerNumber}</span>}
+            {editor && <span className='text-xs' style={{ color: textColor1 }}>{editor}</span>}
           </div>
 
           {/* ── Dynamic Footer Sections (Sections 1 to 5) ── */}
           {dynamicSections.map((sec) => (
             <div
               key={sec.id}
-              className={`${
-                dynamicSections.length <= 2
-                  ? 'lg:col-span-4'
-                  : dynamicSections.length === 3
-                  ? 'lg:col-span-2 md:col-span-1'
-                  : 'lg:col-span-2'
-              } space-y-3`}
+              className="space-y-3 md:block hidden"
             >
               <h4 className="text-xs md:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>
                 {sec.title}
@@ -423,20 +401,6 @@ export default function FooterGadgets({
               </ul>
             </div>
           ))}
-
-          {/* Optional Facebook Page Embed Widget */}
-          {fbPageEmbed && fbPageEmbed.includes('<iframe') && (
-            <div className="lg:col-span-4 space-y-2">
-              <h4 className="text-xs md:text-[13px] font-black tracking-wider uppercase" style={{ color: textColor1 }}>
-                Follow Our Page
-              </h4>
-              <div
-                className="overflow-hidden max-w-full rounded-xl shadow-xs"
-                dangerouslySetInnerHTML={{ __html: fbPageEmbed }}
-              />
-            </div>
-          )}
-
         </div>
       </div>
 
@@ -447,31 +411,15 @@ export default function FooterGadgets({
           style={{ backgroundColor: bgColor2 }}
         >
           {/* Faint Background Watermark Logo Text */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03] overflow-hidden">
-            <div className="flex items-center gap-6 transform -rotate-3 scale-110 md:scale-125">
-              <svg viewBox="0 0 40 40" fill="none" className="w-48 h-48 md:w-64 md:h-64 text-current">
-                <circle cx="16" cy="20" r="9" stroke="currentColor" strokeWidth="3" fill="none" />
-                <circle cx="24" cy="20" r="9" stroke="currentColor" strokeWidth="3" fill="none" />
-              </svg>
-              <span className="text-7xl md:text-9xl font-black tracking-tight font-sans whitespace-nowrap text-current">
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 hidden md:flex items-center justify-center pointer-events-none select-none opacity-[0.03] overflow-hidden">
+              <span className="text-6xl md:text-[150px] font-black tracking-tight font-sans whitespace-nowrap text-current">
                 {siteName}
               </span>
-            </div>
           </div>
 
-          <div className="container mx-auto px-4 md:px-6 relative z-10">
+          <div className="container relative z-10">
             <div
-              className={`grid gap-6 md:gap-8 ${
-                megaMenuColumns.length === 1
-                  ? 'grid-cols-1'
-                  : megaMenuColumns.length === 2
-                  ? 'grid-cols-1 md:grid-cols-2'
-                  : megaMenuColumns.length === 3
-                  ? 'grid-cols-1 md:grid-cols-3'
-                  : megaMenuColumns.length === 4
-                  ? 'grid-cols-2 md:grid-cols-4'
-                  : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-6'
-              }`}
+              className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-8"
             >
               {megaMenuColumns.map((col) => (
                 <div key={col.id} className="space-y-3">
@@ -486,12 +434,12 @@ export default function FooterGadgets({
                       )}
                     </h4>
                   )}
-                  <ul className="space-y-1.5 text-xs">
+                  <ul className="space-y-1.5 text-sm list-disc ml-5">
                     {col.items.map((item) => (
                       <li key={item.id}>
                         <Link
                           href={item.url || '#'}
-                          className="transition-colors block py-0.5 truncate hover:underline"
+                          className="transition-colors font-semibold block py-0.5 truncate hover:underline"
                           style={{ color: textColor2 }}
                         >
                           {item.label}
