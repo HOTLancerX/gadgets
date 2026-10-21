@@ -60,7 +60,8 @@ export default function ProSliderShowcase({
               key={currentImage}
               src={currentImage}
               alt={product.title}
-              className="max-h-115 w-auto object-contain transition-all duration-300 hover:scale-102 mix-blend-multiply brightness-105"
+              className="max-h-115 w-auto object-contain transition-all duration-300 hover:scale-102 mix-blend-multiply brightness-105 select-none pointer-events-none"
+              draggable={false}
               loading="lazy"
             />
           ) : (

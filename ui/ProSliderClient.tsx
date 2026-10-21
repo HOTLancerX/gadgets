@@ -8,7 +8,8 @@
  * ProSliderTabs and ProSliderShowcase.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
 import type { ProSliderProductData } from '../types';
 import ProSliderTabs from './ProSliderTabs';
 import ProSliderShowcase from './ProSliderShowcase';
@@ -124,12 +125,47 @@ export default function ProSliderClient({
       : FALLBACK_PRO_PRODUCTS;
 
   const [activeTabIdx, setActiveTabIdx] = useState<number>(0);
-  const [activeVariantIdx, setActiveVariantIdx] = useState<number>(0);
+  const [variantMap, setVariantMap] = useState<Record<number, number>>({});
 
-  // Reset active variant when tab changes
+  // ─── Embla Carousel Engine for Mouse & Touch Swiping ───
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    align: 'start',
+    skipSnaps: false,
+    dragFree: false,
+  });
+
+  // Sync active tab index when user swipes carousel
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    const snap = emblaApi.selectedScrollSnap();
+    setActiveTabIdx(snap);
+  }, [emblaApi]);
+
   useEffect(() => {
-    setActiveVariantIdx(0);
-  }, [activeTabIdx]);
+    if (!emblaApi) return;
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  // When clicking a tab, smoothly scroll the carousel to that slide
+  const handleSelectTab = useCallback(
+    (index: number) => {
+      setActiveTabIdx(index);
+      if (emblaApi) {
+        emblaApi.scrollTo(index);
+      }
+    },
+    [emblaApi]
+  );
+
+  const handleSelectVariant = useCallback((slideIdx: number, variantIdx: number) => {
+    setVariantMap((prev) => ({ ...prev, [slideIdx]: variantIdx }));
+  }, []);
 
   const currencySymbol =
     (settings?.product_currency_symbol ||
@@ -137,13 +173,11 @@ export default function ProSliderClient({
       initialCurrency ||
       'KSh') as string;
 
-  const activeProduct = activeProducts[activeTabIdx] || activeProducts[0];
-
   const tabsComponent = (
     <ProSliderTabs
       products={activeProducts}
       activeTabIdx={activeTabIdx}
-      onSelectTab={setActiveTabIdx}
+      onSelectTab={handleSelectTab}
     />
   );
 
@@ -159,15 +193,23 @@ export default function ProSliderClient({
         {/* Render Tabs on Top */}
         {tabsPosition === 'top' && tabsComponent}
 
-        {/* ─── Active Product Showcase ─── */}
-        <ProSliderShowcase
-          product={activeProduct}
-          activeVariantIdx={activeVariantIdx}
-          onSelectVariant={setActiveVariantIdx}
-          accentColor={accentColor}
-          ctaText={ctaText}
-          currencySymbol={currencySymbol}
-        />
+        {/* ─── Swipeable Product Showcase Carousel (Embla) ─── */}
+        <div className="overflow-hidden cursor-grab active:cursor-grabbing w-full" ref={emblaRef}>
+          <div className="flex touch-pan-y">
+            {activeProducts.map((prod, idx) => (
+              <div key={prod.productId || idx} className="flex-[0_0_100%] min-w-0">
+                <ProSliderShowcase
+                  product={prod}
+                  activeVariantIdx={variantMap[idx] ?? 0}
+                  onSelectVariant={(vIdx) => handleSelectVariant(idx, vIdx)}
+                  accentColor={accentColor}
+                  ctaText={ctaText}
+                  currencySymbol={currencySymbol}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Render Tabs at Bottom */}
         {tabsPosition === 'bottom' && tabsComponent}

@@ -7,7 +7,7 @@
  * Displays product thumbnail, title, and status badge with active highlight.
  */
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import type { ProSliderProductData } from '../types';
 
 interface ProSliderTabsProps {
@@ -21,10 +21,23 @@ export default function ProSliderTabs({
   activeTabIdx,
   onSelectTab,
 }: ProSliderTabsProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const activeBtn = containerRef.current.children[activeTabIdx] as HTMLElement;
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [activeTabIdx]);
+
   if (!products || products.length === 0) return null;
 
   return (
-    <div className="flex items-center md:justify-center gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-6 pt-2 scroll-smooth">
+    <div
+      ref={containerRef}
+      className="flex items-center md:justify-center gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-6 pt-2 scroll-smooth"
+    >
       {products.map((prod, idx) => {
         const isActive = activeTabIdx === idx;
         const isComingSoon = prod.badge?.toLowerCase().includes('coming');
