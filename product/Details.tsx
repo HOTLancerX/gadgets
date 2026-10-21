@@ -889,6 +889,17 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
                         </div>
                     </div>
                 )}
+
+                {/* ─── 5. AUTOMATIC COMPARE COMPONENT ─── */}
+                {validSpecifications.length > 0 && parsedCompareCandidates.length > 0 && (
+                    <GadgetsCompare
+                        currentProduct={currentCompareItem}
+                        compareProducts={parsedCompareCandidates}
+                        allAvailableProducts={allCategoryCompareCandidates}
+                        currencySymbol={currencySymbol}
+                        onAddToCart={handleAddToCart}
+                    />
+                )}
             </div>
                 {/* ─── VISUAL DESCRIPTION (SSR) ─── */}
                 {hasVisualDescription && (
@@ -904,16 +915,7 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
                     />
                 )}
 
-                {/* ─── 5. AUTOMATIC COMPARE COMPONENT ─── */}
-                {validSpecifications.length > 0 && parsedCompareCandidates.length > 0 && (
-                    <GadgetsCompare
-                        currentProduct={currentCompareItem}
-                        compareProducts={parsedCompareCandidates}
-                        allAvailableProducts={allCategoryCompareCandidates}
-                        currencySymbol={currencySymbol}
-                        onAddToCart={handleAddToCart}
-                    />
-                )}
+                
 
                 {/* ─── 5. SPECIFICATIONS COMPONENT ─── */}
                 {validSpecifications.length > 0 && (
