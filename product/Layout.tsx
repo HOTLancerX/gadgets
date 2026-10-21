@@ -149,9 +149,9 @@ export default function GadgetsProductLayout({
         (permalinkMap["seller"] ?? "seller").trim().replace(/^\/+|\/+$/g, "") || "seller";
 
     const brandData = pageData?.brand ?? null;
-    const brandPrefix = (permalinkMap["brands"] ?? "category/brands")
+    const brandPrefix = (permalinkMap["brands"] ?? "brands")
         .trim()
-        .replace(/^\/+|\/+$/g, "");
+        .replace(/^\/+|\/+$/g, "") || "brands";
 
     const brand = brandData
         ? {

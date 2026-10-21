@@ -161,7 +161,7 @@ export default function HeaderGadgets({
           </div>
 
           {/* Right Action Icons: Account & Cart (Desktop + Mobile) */}
-          <div className="flex items-center justify-end gap-4 shrink-0">
+          <div className="flex items-center justify-end gap-4 md:gap-8 shrink-0">
             {/* Account Component */}
             <AccountGadgets color={brandColor} />
 

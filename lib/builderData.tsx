@@ -12,13 +12,20 @@ import connectDB from "@/lib/mongodb";
 import Post from "@/models/post";
 import PostInfo from "@/models/post_info";
 import Permalink from "@/models/permalink";
+import Cat from "@/models/cat";
+import CatInfo from "@/models/cat_info";
 import { Types } from "mongoose";
+import ProMainSlider from "../ui/ProMainSlider";
 import ProSliderServer from "../ui/ProSliderServer";
 import GadgetsGridServer from "../ui/GadgetsGridServer";
 import ProCategorySlider from "../ui/ProCategorySlider";
 import ProCategoryGrid from "../ui/ProCategoryGrid";
 import ExploreProductsSlider from "../ui/ExploreProductsSlider";
 import type { CategoryTabConfig } from "../elements/CategorySelector";
+
+registerBuilderElement("gadgets-pro-main-slider", (schema) => {
+  return <ProMainSlider schema={schema} />;
+});
 
 registerBuilderElement("gadgets-pro-slider", async (schema) => {
   const c = schema?.content ?? {};
@@ -354,4 +361,153 @@ registerBuilderElement("gadgets-poster-grid", async (schema) => {
     />
   );
 });
+
+// Register Showcase Product Grid ("A Watch For Everyone" multi-style product showcase)
+import ShowcaseProductGrid from "../ui/ShowcaseProductGrid";
+
+registerBuilderElement("gadgets-showcase-grid", async (schema) => {
+  const c = schema?.content ?? {};
+  const st = schema?.style ?? {};
+  const a = schema?.advanced ?? {};
+
+  const tabs = normalizeTabs([], c.categoryId);
+  const limitCount = Math.min(Number(c.limit) || 7, 30);
+  const { productsByCategory, permalinkMap } = await fetchCategoryData(tabs, limitCount);
+
+  const activeCatId = extractCategoryId(c.categoryId) || 'all';
+  const products = productsByCategory[activeCatId] || productsByCategory['all'] || [];
+
+  return (
+    <ShowcaseProductGrid
+      titlePrefix={c.titlePrefix ?? 'A Watch For'}
+      titleHighlight={c.titleHighlight ?? 'Everyone'}
+      viewAllLink={c.viewAllLink}
+      categoryId={c.categoryId ?? 'all'}
+      limit={limitCount}
+      gridStyle={st.gridStyle ?? 'featured-left'}
+      currencySymbol={c.currencySymbol ?? 'KSh'}
+      products={products}
+      permalinkMap={permalinkMap}
+      margin={a.margin ?? st.margin}
+      padding={a.padding ?? st.padding}
+    />
+  );
+});
+
+// Register Brand Directory Element
+import BrandDirectory from "../ui/BrandDirectory";
+
+registerBuilderElement("gadgets-brand", async (schema) => {
+  const c = schema?.content ?? {};
+  const l = schema?.layout ?? {};
+  const s = schema?.style ?? {};
+  const a = schema?.advanced ?? {};
+
+  await connectDB();
+
+  let permalinkPrefix = "brands";
+  try {
+    const pl = await Permalink.findOne({ contentType: "brands" }).lean() as any;
+    if (pl?.prefix) permalinkPrefix = pl.prefix.trim().replace(/^\/+|\/+$/g, "");
+  } catch { /* fallback */ }
+
+  const brandsRaw = await Cat.find({ type: "brands", status: { $ne: "trash" } })
+    .sort({ title: 1 })
+    .lean() as any[];
+
+  const brandIds = brandsRaw.map((b) => b._id);
+  const brandIdStrings = brandIds.map((id) => String(id));
+
+  const catInfos = await CatInfo.find({
+    catId: { $in: brandIds },
+    name: { $in: ["image", "images", "logo", "thumbnail"] },
+  }).lean() as any[];
+
+  const imageMap: Record<string, string> = {};
+  for (const ci of catInfos) {
+    const cid = String(ci.catId);
+    if (!imageMap[cid] && ci.value) {
+      let val = String(ci.value).trim();
+      if (val.startsWith("[") && val.endsWith("]")) {
+        try {
+          const parsed = JSON.parse(val);
+          if (Array.isArray(parsed) && parsed.length > 0) val = String(parsed[0]);
+        } catch { /* keep */ }
+      }
+      if (val) imageMap[cid] = val;
+    }
+  }
+
+  const postCounts = await Post.aggregate([
+    { $match: { type: "product", status: "published", brands: { $in: brandIds } } },
+    { $group: { _id: "$brands", count: { $sum: 1 } } },
+  ]);
+
+  const countsMap: Record<string, number> = {};
+  for (const row of postCounts) {
+    if (row._id) countsMap[String(row._id)] = row.count;
+  }
+
+  // Also count PostInfo references
+  try {
+    const postInfoBrandAgg = await PostInfo.aggregate([
+      { $match: { name: { $in: ["brand", "brands", "brandId", "brand_id"] } } },
+      { $project: { postId: 1, value: 1 } },
+    ]);
+    const postInfoMatchedByBrand: Record<string, Set<string>> = {};
+    for (const pi of postInfoBrandAgg) {
+      const rawVal = String(pi.value || "");
+      for (const bIdStr of brandIdStrings) {
+        if (rawVal.includes(bIdStr)) {
+          if (!postInfoMatchedByBrand[bIdStr]) postInfoMatchedByBrand[bIdStr] = new Set();
+          postInfoMatchedByBrand[bIdStr].add(String(pi.postId));
+        }
+      }
+    }
+    for (const [bIdStr, setOfPostIds] of Object.entries(postInfoMatchedByBrand)) {
+      const direct = countsMap[bIdStr] || 0;
+      countsMap[bIdStr] = Math.max(direct, setOfPostIds.size);
+    }
+  } catch { /* non-critical */ }
+
+  const brands = brandsRaw.map((b) => {
+    const idStr = String(b._id);
+    let img = b.image || imageMap[idStr] || "";
+    if (typeof img === "string" && img.startsWith("[") && img.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(img);
+        if (Array.isArray(parsed) && parsed.length > 0) img = parsed[0];
+      } catch { /* fallback */ }
+    }
+    return {
+      _id: idStr,
+      title: b.title || "Untitled Brand",
+      slug: b.slug || "",
+      image: img || "",
+      productCount: countsMap[idStr] || 0,
+    };
+  });
+
+  return (
+    <BrandDirectory
+      badgeText={c.badgeText}
+      title={c.title}
+      description={c.description}
+      searchPlaceholder={c.searchPlaceholder}
+      catalogNote={c.catalogNote}
+      hideEmptyBrands={c.hideEmptyBrands}
+      columnsDesktop={l.columnsDesktop}
+      columnsTablet={l.columnsTablet}
+      columnsMobile={l.columnsMobile}
+      gap={l.gap}
+      accentColor={s.accentColor}
+      initialBrands={brands}
+      permalinkPrefix={permalinkPrefix}
+      margin={a.margin ?? s.margin}
+      padding={a.padding ?? s.padding}
+    />
+  );
+});
+
+
 

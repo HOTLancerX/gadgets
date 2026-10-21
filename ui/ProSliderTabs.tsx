@@ -24,7 +24,7 @@ export default function ProSliderTabs({
   if (!products || products.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-6 pt-2 scroll-smooth">
+    <div className="flex items-center md:justify-center gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-6 pt-2 scroll-smooth">
       {products.map((prod, idx) => {
         const isActive = activeTabIdx === idx;
         const isComingSoon = prod.badge?.toLowerCase().includes('coming');

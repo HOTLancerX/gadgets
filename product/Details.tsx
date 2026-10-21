@@ -237,6 +237,27 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
     const [expandedDesc, setExpandedDesc] = useState(false);
     const [activeTab, setActiveTab] = useState<"overview" | "specs" | "compare" | "reviews">("overview");
 
+    const effectiveBrand = useMemo(() => {
+        if (brand && brand.title) {
+            const prefix = (permalinkMap["brands"] ?? "brands").trim().replace(/^\/+|\/+$/g, "") || "brands";
+            const url = brand.url || `/${prefix}/${brand.slug || ""}`;
+            return { title: brand.title, url };
+        }
+        const fallbackName =
+            (typeof info?.brand === "string" && !info.brand.startsWith("{") ? info.brand : null) ||
+            info?.brand_name ||
+            info?.brandTitle;
+        if (fallbackName && typeof fallbackName === "string" && fallbackName.trim()) {
+            const slug = fallbackName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+            const prefix = (permalinkMap["brands"] ?? "brands").trim().replace(/^\/+|\/+$/g, "") || "brands";
+            return {
+                title: fallbackName.trim(),
+                url: `/${prefix}/${slug}`,
+            };
+        }
+        return null;
+    }, [brand, info, permalinkMap]);
+
     // Handle variant option selection
     const handleOptionSelect = (label: string, value: string) => {
         const next = { ...selectedOptions, [label]: value };
@@ -509,17 +530,21 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
                     {/* Right Column: Key Details & Purchasing (7 Cols) */}
                     <div className="flex flex-col justify-between space-y-6">
                         <div className="space-y-4">
-                            {/* Brand Tag & Stock Status */}
+                            {/* Brand & Stock Status */}
                             <div className="flex items-center justify-between gap-2 flex-wrap">
-                                {brand ? (
-                                    <Link
-                                        href={brand.url}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-bold text-xs hover:bg-blue-100 transition shadow-2xs"
-                                    >
-                                        <Icon icon="solar:tag-bold" width={13} />
-                                        <span>{brand.title}</span>
-                                    </Link>
-                                ) : null}
+                                {effectiveBrand ? (
+                                    <div className="text-xs sm:text-sm text-gray-500 font-medium flex items-center gap-1.5">
+                                        <span>Brand:</span>
+                                        <Link
+                                            href={effectiveBrand.url}
+                                            className="font-bold text-[#0053e2] hover:text-blue-700 hover:underline transition"
+                                        >
+                                            {effectiveBrand.title}
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <div />
+                                )}
 
                                 <div className="flex items-center gap-2">
                                     <span

@@ -51,11 +51,10 @@ export default function ProSliderShowcase({
   const productUrl = product.postUrl || `/product/${product.slug}`;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center pt-8 md:pt-12">
-      
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-6 md:items-center">
       {/* ─── Left Column: Large Interactive Product Image ─── */}
-      <div className="lg:col-span-6 flex items-center justify-center relative">
-        <div className="w-full flex items-center justify-center p-4">
+      <div className="flex items-center justify-center relative">
+        <div className="w-full flex items-center justify-center">
           {currentImage ? (
             <img
               key={currentImage}
@@ -73,7 +72,7 @@ export default function ProSliderShowcase({
       </div>
 
       {/* ─── Right Column: Details & Actions ─── */}
-      <div className="lg:col-span-6 space-y-8 text-left">
+      <div className="space-y-8 text-left">
         
         {/* Status Badge (e.g. "• New", "• Coming Soon") */}
         <div>
@@ -94,13 +93,14 @@ export default function ProSliderShowcase({
           </h3>
         </div>
 
-        {/* Hero Feature Highlight Headline */}
+        {/* Hero Feature Highlight Headline
         {product.highlightTitle && (
           <div
             className="text-gray-800 description pb-6"
             dangerouslySetInnerHTML={{ __html: product.highlightTitle }}
           />
         )}
+        */}
 
         {/* Subtitle / Tagline */}
         {product.subtitle && (

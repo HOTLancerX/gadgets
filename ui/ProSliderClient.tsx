@@ -170,11 +170,7 @@ export default function ProSliderClient({
         />
 
         {/* Render Tabs at Bottom */}
-        {tabsPosition === 'bottom' && (
-          <div className="pt-8 md:pt-12">
-            {tabsComponent}
-          </div>
-        )}
+        {tabsPosition === 'bottom' && tabsComponent}
       </div>
     </div>
   );
