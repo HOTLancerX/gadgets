@@ -29,6 +29,7 @@ import GadgetsFrequencyTogether, { type SetupProductItem } from "./FrequencyToge
 import GadgetsReviews, { type ReviewsData } from "./Reviews";
 import GadgetsVideos, { type VideoItem } from "./Videos";
 import GadgetsRelated from "./Related";
+import GadgetsVisualDescription from "./VisualDescription";
 
 export interface GadgetsProductDetailsProps {
     data: { id: string; title: string; slug: string };
@@ -446,9 +447,13 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
     }, [allCompareCandidates, categoryProducts, permalinkMap, data.id, mapToCompareItem]);
 
     const hasOverview = Boolean((htmlDescription || description)?.trim());
+    const visualDescription =
+        (typeof info?._visual_description === "string" ? info._visual_description : "") ||
+        (typeof info?.visual_description === "string" ? info.visual_description : "");
+    const hasVisualDescription = Boolean(visualDescription?.trim());
 
     return (
-        <div className="bg-[#f8fafc] min-h-screen pb-24 text-gray-800">
+        <div className="min-h-screen">
             {/* Top Breadcrumb Bar */}
             <div className="bg-white border-b border-gray-200/80">
                 <div className="container py-3">
@@ -776,6 +781,15 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
 
                 {/* ─── 2. STICKY ANCHOR BAR ─── */}
                 <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-md rounded-2xl border border-gray-200 p-1.5 shadow-xs flex items-center gap-1 overflow-x-auto scrollbar-none">
+                    {hasVisualDescription && (
+                        <a
+                            href="#visual-description"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition whitespace-nowrap flex items-center gap-1.5"
+                        >
+                            <Icon icon="solar:layers-minimalistic-bold" width={14} className="text-blue-600" />
+                            <span>Visual Overview</span>
+                        </a>
+                    )}
                     {hasOverview && (
                         <a
                             href="#description"
@@ -875,7 +889,12 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
                         </div>
                     </div>
                 )}
-
+            </div>
+                {/* ─── VISUAL DESCRIPTION (SSR) ─── */}
+                {hasVisualDescription && (
+                    <GadgetsVisualDescription data={visualDescription} productTitle={data.title} />
+                )}
+            <div className="container py-6 space-y-8">
                 {/* ─── 4. COMPLETE YOUR SETUP (FREQUENTLY BOUGHT TOGETHER) ─── */}
                 {frequentlyTogether && frequentlyTogether.length > 0 && (
                     <GadgetsFrequencyTogether
