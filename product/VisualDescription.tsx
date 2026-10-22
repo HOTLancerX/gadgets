@@ -22,6 +22,7 @@ export default function VisualDescription({ data, productTitle }: VisualDescript
         <section
             id="visual-description"
             aria-label="Visual Product Overview"
+            suppressHydrationWarning
         >
             <VisualDescriptionRenderer data={data} />
         </section>
