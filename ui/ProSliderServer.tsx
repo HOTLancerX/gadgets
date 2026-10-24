@@ -9,6 +9,7 @@ import connectDB from "@/lib/mongodb";
 import Post from "@/models/post";
 import PostInfo from "@/models/post_info";
 import Permalink from "@/models/permalink";
+import { withCache } from "@/lib/cache";
 import { Types } from "mongoose";
 import type { ProSliderTabConfig, ProSliderProductData, ProSliderVariant } from "../types";
 import ProSliderClient from "./ProSliderClient";
@@ -82,77 +83,85 @@ export default async function ProSliderServer({
   const validTabs = (productTabs || []).filter((t) => t.productId && Types.ObjectId.isValid(t.productId));
 
   if (validTabs.length > 0) {
-    await connectDB();
+    const tabKeys = validTabs.map((t) => t.productId).join(",");
+    const cacheKey = `gadgets:pro_slider:${tabKeys}`;
 
-    const ids = validTabs.map((t) => new Types.ObjectId(t.productId));
+    products = await withCache(cacheKey, async () => {
+      await connectDB();
+      const ids = validTabs.map((t) => new Types.ObjectId(t.productId));
 
-    // Parallel fetch: Permalink prefix, Posts, and PostInfos
-    const [productPL, postDocs, postInfos] = await Promise.all([
-      Permalink.findOne({ contentType: "product" }).lean() as Promise<any>,
-      Post.find({ _id: { $in: ids }, status: "published" }).select("_id title slug").lean(),
-      PostInfo.find({
-        postId: { $in: ids },
-        name: { $in: ["images", "image", "thumbnail", "_variate", "price", "regularPrice", "stock_status", "stock", "highlight", "shortDescription", "subtitle"] },
-      }).select("postId name value").lean(),
-    ]);
+      // Parallel fetch: Permalink prefix, Posts, and PostInfos
+      const [productPL, postDocs, postInfos] = await Promise.all([
+        Permalink.findOne({ contentType: "product" }).lean() as Promise<any>,
+        Post.find({ _id: { $in: ids }, status: "published" }).select("_id title slug").lean(),
+        PostInfo.find({
+          postId: { $in: ids },
+          name: { $in: ["images", "image", "thumbnail", "_variate", "price", "regularPrice", "stock_status", "stock", "highlight", "shortDescription", "subtitle"] },
+        }).select("postId name value").lean(),
+      ]);
 
-    const productPrefix = (productPL?.prefix ?? "product").trim().replace(/^\/+|\/+$/g, "") || "product";
+      const productPrefix = (productPL?.prefix ?? "product").trim().replace(/^\/+|\/+$/g, "") || "product";
 
-    // Map PostInfos by postId
-    const infoMap: Record<string, Record<string, string>> = {};
-    for (const info of postInfos) {
-      const key = (info.postId as Types.ObjectId).toString();
-      if (!infoMap[key]) infoMap[key] = {};
-      infoMap[key][info.name] = info.value;
-    }
+      // Map PostInfos by postId
+      const infoMap: Record<string, Record<string, string>> = {};
+      for (const info of postInfos) {
+        const key = (info.postId as Types.ObjectId).toString();
+        if (!infoMap[key]) infoMap[key] = {};
+        infoMap[key][info.name] = info.value;
+      }
 
-    // Map Posts by _id
-    const postMap = new Map<string, any>(postDocs.map((p: any) => [p._id.toString(), p]));
+      // Map Posts by _id
+      const postMap = new Map<string, any>(postDocs.map((p: any) => [p._id.toString(), p]));
 
-    // Construct products in exact configured tab order
-    for (const tab of validTabs) {
-      const post = postMap.get(tab.productId);
-      if (!post) continue;
+      const list: ProSliderProductData[] = [];
 
-      const pId = post._id.toString();
-      const info = infoMap[pId] || {};
-      const mainImg = resolveImage(info);
-      const variants = parseVariants(info._variate, mainImg);
+      // Construct products in exact configured tab order
+      for (const tab of validTabs) {
+        const post = postMap.get(tab.productId);
+        if (!post) continue;
 
-      // Price extraction
-      let price: number | string = 0;
-      if (info.price) price = parseFloat(info.price) || info.price;
-      else if (info.regularPrice) price = parseFloat(info.regularPrice) || info.regularPrice;
-      else if (variants.length > 0 && variants[0]?.price) price = variants[0].price;
+        const pId = post._id.toString();
+        const info = infoMap[pId] || {};
+        const mainImg = resolveImage(info);
+        const variants = parseVariants(info._variate, mainImg);
 
-      // Hero highlight headline
-      const highlightTitle =
-        tab.highlightTitle?.trim() ||
-        info.highlight ||
-        info.shortDescription ||
-        "";
+        // Price extraction
+        let price: number | string = 0;
+        if (info.price) price = parseFloat(info.price) || info.price;
+        else if (info.regularPrice) price = parseFloat(info.regularPrice) || info.regularPrice;
+        else if (variants.length > 0 && variants[0]?.price) price = variants[0].price;
 
-      // Subtitle
-      const subtitle = tab.subtitle?.trim() || info.subtitle || "";
+        // Hero highlight headline
+        const highlightTitle =
+          tab.highlightTitle?.trim() ||
+          info.highlight ||
+          info.shortDescription ||
+          "";
 
-      // Badge
-      const badge = tab.badge?.trim() || "New";
+        // Subtitle
+        const subtitle = tab.subtitle?.trim() || info.subtitle || "";
 
-      products.push({
-        productId: pId,
-        title: post.title || "Product",
-        slug: post.slug || "product",
-        postUrl: `/${productPrefix}/${post.slug || ""}`,
-        thumbnail: mainImg,
-        mainImage: mainImg,
-        badge,
-        highlightTitle,
-        subtitle,
-        price,
-        stockStatus: info.stock_status || "In stock",
-        variants,
-      });
-    }
+        // Badge
+        const badge = tab.badge?.trim() || "New";
+
+        list.push({
+          productId: pId,
+          title: post.title || "Product",
+          slug: post.slug || "product",
+          postUrl: `/${productPrefix}/${post.slug || ""}`,
+          thumbnail: mainImg,
+          mainImage: mainImg,
+          badge,
+          highlightTitle,
+          subtitle,
+          price,
+          stockStatus: info.stock_status || "In stock",
+          variants,
+        });
+      }
+
+      return list;
+    }, 300 * 1000)();
   }
 
   return (
