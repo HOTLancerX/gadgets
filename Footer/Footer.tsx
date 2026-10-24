@@ -100,6 +100,43 @@ function parseFooterSections(values: Record<string, any>): FooterSection[] {
       });
     }
   }
+
+  // Fallback defaults if no sections are configured in admin settings
+  if (result.length === 0) {
+    return [
+      {
+        id: 'sec-1',
+        title: 'Quick Links',
+        items: [
+          { id: 'item-1-1', name: 'About Us', link: '/about', icon: 'solar:info-circle-linear' },
+          { id: 'item-1-2', name: 'Contact Us', link: '/contact', icon: 'solar:phone-linear' },
+          { id: 'item-1-3', name: 'Track Order', link: '/track-order', icon: 'solar:box-linear' },
+          { id: 'item-1-4', name: 'FAQ', link: '/faq', icon: 'solar:question-circle-linear' },
+        ],
+      },
+      {
+        id: 'sec-2',
+        title: 'Customer Care',
+        items: [
+          { id: 'item-2-1', name: 'Shipping Policy', link: '/shipping-policy', icon: 'solar:delivery-linear' },
+          { id: 'item-2-2', name: 'Returns & Refunds', link: '/returns-refunds', icon: 'solar:shield-check-linear' },
+          { id: 'item-2-3', name: 'Terms & Conditions', link: '/terms', icon: 'solar:document-text-linear' },
+          { id: 'item-2-4', name: 'Privacy Policy', link: '/privacy-policy', icon: 'solar:lock-keyhole-linear' },
+        ],
+      },
+      {
+        id: 'sec-3',
+        title: 'Categories',
+        items: [
+          { id: 'item-3-1', name: 'Smartphones', link: '/product/category/phones', icon: 'solar:smartphone-linear' },
+          { id: 'item-3-2', name: 'Audio & Sound', link: '/product/category/audio', icon: 'solar:headphones-round-linear' },
+          { id: 'item-3-3', name: 'Power & Cables', link: '/product/category/chargers', icon: 'solar:battery-charge-linear' },
+          { id: 'item-3-4', name: 'Smart Watches', link: '/product/category/watches', icon: 'solar:watch-round-linear' },
+        ],
+      },
+    ];
+  }
+
   return result;
 }
 
@@ -125,10 +162,15 @@ function parseSocialMediaSettings(values: Record<string, any>): SocialItem[] {
         }));
       }
     } catch {}
-  } else if (Array.isArray(values.social_media)) {
+  } else if (Array.isArray(values.social_media) && values.social_media.length > 0) {
     return values.social_media;
   }
-  return [];
+  return [
+    { id: 'soc-1', name: 'Facebook', icon: 'fa6-brands:facebook-f', link: 'https://facebook.com', bg_color: '#1877f2', text_color: '#ffffff', show_mode: 'icon' },
+    { id: 'soc-2', name: 'Instagram', icon: 'fa6-brands:instagram', link: 'https://instagram.com', bg_color: '#e4405f', text_color: '#ffffff', show_mode: 'icon' },
+    { id: 'soc-3', name: 'YouTube', icon: 'fa6-brands:youtube', link: 'https://youtube.com', bg_color: '#ff0000', text_color: '#ffffff', show_mode: 'icon' },
+    { id: 'soc-4', name: 'WhatsApp', icon: 'fa6-brands:whatsapp', link: 'https://whatsapp.com', bg_color: '#25d366', text_color: '#ffffff', show_mode: 'icon' },
+  ];
 }
 
 export default function FooterGadgets({

@@ -15,6 +15,7 @@ import Permalink from "@/models/permalink";
 import Cat from "@/models/cat";
 import CatInfo from "@/models/cat_info";
 import { Types } from "mongoose";
+import { withCache } from "@/lib/cache";
 import ProMainSlider from "../ui/ProMainSlider";
 import ProSliderServer from "../ui/ProSliderServer";
 import GadgetsGridServer from "../ui/GadgetsGridServer";
@@ -88,8 +89,31 @@ function normalizeTabs(rawTabs: any, rawCategoryId: any): CategoryTabConfig[] {
   });
 }
 
-// Helper for pre-fetching category products on server
-async function fetchCategoryData(tabs: CategoryTabConfig[], limitCount: number) {
+const GADGETS_CARD_FIELDS = [
+  "images",
+  "image",
+  "thumbnail",
+  "_thumbnail",
+  "_variate",
+  "variations",
+  "price",
+  "regularPrice",
+  "salePrice",
+  "sale_price",
+  "stock_status",
+  "stock",
+  "highlight",
+  "shortDescription",
+  "short_description",
+  "badge",
+  "rating",
+  "reviews_count",
+  "brand",
+  "category",
+];
+
+// Helper for pre-fetching category products on server with projection and caching
+async function fetchCategoryDataRaw(tabs: CategoryTabConfig[], limitCount: number) {
   const productsByCategory: Record<string, any[]> = {};
   const permalinkMap: Record<string, string> = {};
 
@@ -105,63 +129,75 @@ async function fetchCategoryData(tabs: CategoryTabConfig[], limitCount: number) 
 
     const limit = Math.min(Number(limitCount) || 10, 48);
 
-    for (const tab of tabs) {
-      const catId = extractCategoryId(tab.id);
-      const query: Record<string, any> = {
-        type: "product",
-        status: "published",
-      };
+    await Promise.all(
+      tabs.map(async (tab) => {
+        const catId = extractCategoryId(tab.id);
+        const query: Record<string, any> = {
+          type: "product",
+          status: "published",
+        };
 
-      if (catId && catId !== 'all') {
-        if (Types.ObjectId.isValid(catId)) {
-          query.category = new Types.ObjectId(catId);
+        if (catId && catId !== 'all') {
+          if (Types.ObjectId.isValid(catId)) {
+            query.category = new Types.ObjectId(catId);
+          } else {
+            productsByCategory[catId] = [];
+            productsByCategory[tab.id] = [];
+            return;
+          }
+        }
+
+        const postDocs = await Post.find(query)
+          .select({ _id: 1, title: 1, slug: 1, status: 1, category: 1, createdAt: 1 })
+          .sort({ createdAt: -1 })
+          .limit(limit)
+          .lean();
+
+        if (postDocs.length > 0) {
+          const postIds = postDocs.map((p) => p._id);
+          const postInfos = await PostInfo.find({
+            postId: { $in: postIds },
+            name: { $in: GADGETS_CARD_FIELDS },
+          })
+            .select({ postId: 1, name: 1, value: 1 })
+            .lean();
+
+          const infoMap: Record<string, Record<string, string>> = {};
+          for (const info of postInfos) {
+            const pid = String(info.postId);
+            if (!infoMap[pid]) infoMap[pid] = {};
+            infoMap[pid][info.name] = info.value;
+          }
+
+          const serialized = postDocs.map((doc) => ({
+            _id: String(doc._id),
+            title: doc.title,
+            slug: doc.slug,
+            status: doc.status,
+            category: doc.category ? String(doc.category) : null,
+            createdAt: doc.createdAt ? new Date(doc.createdAt).toISOString() : undefined,
+            info: infoMap[String(doc._id)] || {},
+          }));
+
+          productsByCategory[catId] = serialized;
+          productsByCategory[tab.id] = serialized;
         } else {
-          // If catId is not a valid ObjectId, don't execute an invalid query
           productsByCategory[catId] = [];
-          continue;
+          productsByCategory[tab.id] = [];
         }
-      }
-
-      const postDocs = await Post.find(query)
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .lean();
-
-      if (postDocs.length > 0) {
-        const postIds = postDocs.map((p) => p._id);
-        const postInfos = await PostInfo.find({
-          postId: { $in: postIds },
-        }).lean();
-
-        const infoMap: Record<string, Record<string, string>> = {};
-        for (const info of postInfos) {
-          const pid = String(info.postId);
-          if (!infoMap[pid]) infoMap[pid] = {};
-          infoMap[pid][info.name] = info.value;
-        }
-
-        const serialized = postDocs.map((doc) => ({
-          _id: String(doc._id),
-          title: doc.title,
-          slug: doc.slug,
-          status: doc.status,
-          category: doc.category ? String(doc.category) : null,
-          createdAt: doc.createdAt ? new Date(doc.createdAt).toISOString() : undefined,
-          info: infoMap[String(doc._id)] || {},
-        }));
-
-        productsByCategory[catId] = serialized;
-        productsByCategory[tab.id] = serialized;
-      } else {
-        productsByCategory[catId] = [];
-        productsByCategory[tab.id] = [];
-      }
-    }
+      })
+    );
   } catch (err) {
     console.error("[gadgets category SSR error]", err);
   }
 
   return { productsByCategory, permalinkMap };
+}
+
+async function fetchCategoryData(tabs: CategoryTabConfig[], limitCount: number) {
+  const tabIds = tabs.map((t) => t.id).join(",");
+  const cacheKey = `gadgets:categorydata:${limitCount}:${tabIds}`;
+  return withCache(cacheKey, () => fetchCategoryDataRaw(tabs, limitCount), 300)();
 }
 
 // ─── Pro-Category Slider SSR ───
@@ -403,90 +439,94 @@ registerBuilderElement("gadgets-brand", async (schema) => {
   const s = schema?.style ?? {};
   const a = schema?.advanced ?? {};
 
-  await connectDB();
+  const { brands, permalinkPrefix } = await withCache("gadgets:brand_directory_data", async () => {
+    await connectDB();
 
-  let permalinkPrefix = "brands";
-  try {
-    const pl = await Permalink.findOne({ contentType: "brands" }).lean() as any;
-    if (pl?.prefix) permalinkPrefix = pl.prefix.trim().replace(/^\/+|\/+$/g, "");
-  } catch { /* fallback */ }
+    let permalinkPrefix = "brands";
+    try {
+      const pl = await Permalink.findOne({ contentType: "brands" }).lean() as any;
+      if (pl?.prefix) permalinkPrefix = pl.prefix.trim().replace(/^\/+|\/+$/g, "");
+    } catch { /* fallback */ }
 
-  const brandsRaw = await Cat.find({ type: "brands", status: { $ne: "trash" } })
-    .sort({ title: 1 })
-    .lean() as any[];
+    const brandsRaw = await Cat.find({ type: "brands", status: { $ne: "trash" } })
+      .sort({ title: 1 })
+      .lean() as any[];
 
-  const brandIds = brandsRaw.map((b) => b._id);
-  const brandIdStrings = brandIds.map((id) => String(id));
+    const brandIds = brandsRaw.map((b) => b._id);
+    const brandIdStrings = brandIds.map((id) => String(id));
 
-  const catInfos = await CatInfo.find({
-    catId: { $in: brandIds },
-    name: { $in: ["image", "images", "logo", "thumbnail"] },
-  }).lean() as any[];
+    const catInfos = await CatInfo.find({
+      catId: { $in: brandIds },
+      name: { $in: ["image", "images", "logo", "thumbnail"] },
+    }).lean() as any[];
 
-  const imageMap: Record<string, string> = {};
-  for (const ci of catInfos) {
-    const cid = String(ci.catId);
-    if (!imageMap[cid] && ci.value) {
-      let val = String(ci.value).trim();
-      if (val.startsWith("[") && val.endsWith("]")) {
-        try {
-          const parsed = JSON.parse(val);
-          if (Array.isArray(parsed) && parsed.length > 0) val = String(parsed[0]);
-        } catch { /* keep */ }
+    const imageMap: Record<string, string> = {};
+    for (const ci of catInfos) {
+      const cid = String(ci.catId);
+      if (!imageMap[cid] && ci.value) {
+        let val = String(ci.value).trim();
+        if (val.startsWith("[") && val.endsWith("]")) {
+          try {
+            const parsed = JSON.parse(val);
+            if (Array.isArray(parsed) && parsed.length > 0) val = String(parsed[0]);
+          } catch { /* keep */ }
+        }
+        if (val) imageMap[cid] = val;
       }
-      if (val) imageMap[cid] = val;
     }
-  }
 
-  const postCounts = await Post.aggregate([
-    { $match: { type: "product", status: "published", brands: { $in: brandIds } } },
-    { $group: { _id: "$brands", count: { $sum: 1 } } },
-  ]);
-
-  const countsMap: Record<string, number> = {};
-  for (const row of postCounts) {
-    if (row._id) countsMap[String(row._id)] = row.count;
-  }
-
-  // Also count PostInfo references
-  try {
-    const postInfoBrandAgg = await PostInfo.aggregate([
-      { $match: { name: { $in: ["brand", "brands", "brandId", "brand_id"] } } },
-      { $project: { postId: 1, value: 1 } },
+    const postCounts = await Post.aggregate([
+      { $match: { type: "product", status: "published", brands: { $in: brandIds } } },
+      { $group: { _id: "$brands", count: { $sum: 1 } } },
     ]);
-    const postInfoMatchedByBrand: Record<string, Set<string>> = {};
-    for (const pi of postInfoBrandAgg) {
-      const rawVal = String(pi.value || "");
-      for (const bIdStr of brandIdStrings) {
-        if (rawVal.includes(bIdStr)) {
-          if (!postInfoMatchedByBrand[bIdStr]) postInfoMatchedByBrand[bIdStr] = new Set();
-          postInfoMatchedByBrand[bIdStr].add(String(pi.postId));
+
+    const countsMap: Record<string, number> = {};
+    for (const row of postCounts) {
+      if (row._id) countsMap[String(row._id)] = row.count;
+    }
+
+    // Also count PostInfo references
+    try {
+      const postInfoBrandAgg = await PostInfo.aggregate([
+        { $match: { name: { $in: ["brand", "brands", "brandId", "brand_id"] } } },
+        { $project: { postId: 1, value: 1 } },
+      ]);
+      const postInfoMatchedByBrand: Record<string, Set<string>> = {};
+      for (const pi of postInfoBrandAgg) {
+        const rawVal = String(pi.value || "");
+        for (const bIdStr of brandIdStrings) {
+          if (rawVal.includes(bIdStr)) {
+            if (!postInfoMatchedByBrand[bIdStr]) postInfoMatchedByBrand[bIdStr] = new Set();
+            postInfoMatchedByBrand[bIdStr].add(String(pi.postId));
+          }
         }
       }
-    }
-    for (const [bIdStr, setOfPostIds] of Object.entries(postInfoMatchedByBrand)) {
-      const direct = countsMap[bIdStr] || 0;
-      countsMap[bIdStr] = Math.max(direct, setOfPostIds.size);
-    }
-  } catch { /* non-critical */ }
+      for (const [bIdStr, setOfPostIds] of Object.entries(postInfoMatchedByBrand)) {
+        const direct = countsMap[bIdStr] || 0;
+        countsMap[bIdStr] = Math.max(direct, setOfPostIds.size);
+      }
+    } catch { /* non-critical */ }
 
-  const brands = brandsRaw.map((b) => {
-    const idStr = String(b._id);
-    let img = b.image || imageMap[idStr] || "";
-    if (typeof img === "string" && img.startsWith("[") && img.endsWith("]")) {
-      try {
-        const parsed = JSON.parse(img);
-        if (Array.isArray(parsed) && parsed.length > 0) img = parsed[0];
-      } catch { /* fallback */ }
-    }
-    return {
-      _id: idStr,
-      title: b.title || "Untitled Brand",
-      slug: b.slug || "",
-      image: img || "",
-      productCount: countsMap[idStr] || 0,
-    };
-  });
+    const brands = brandsRaw.map((b) => {
+      const idStr = String(b._id);
+      let img = b.image || imageMap[idStr] || "";
+      if (typeof img === "string" && img.startsWith("[") && img.endsWith("]")) {
+        try {
+          const parsed = JSON.parse(img);
+          if (Array.isArray(parsed) && parsed.length > 0) img = parsed[0];
+        } catch { /* fallback */ }
+      }
+      return {
+        _id: idStr,
+        title: b.title || "Untitled Brand",
+        slug: b.slug || "",
+        image: img || "",
+        productCount: countsMap[idStr] || 0,
+      };
+    });
+
+    return { brands, permalinkPrefix };
+  }, 300)();
 
   return (
     <BrandDirectory
