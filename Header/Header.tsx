@@ -15,7 +15,7 @@
  * - Mobile responsive drawer & search popup
  */
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -61,7 +61,7 @@ function checkIsActive(itemUrl: string, pathname: string, searchParams: URLSearc
   }
 }
 
-export default function HeaderGadgets({
+function HeaderGadgetsInner({
   settings: propSettings,
   mainItems = [],
   mobileItems = [],
@@ -373,5 +373,13 @@ function MegaMenuColumns({
         </div>
       ))}
     </div>
+  );
+}
+
+export default function HeaderGadgets(props: HeaderGadgetsProps) {
+  return (
+    <Suspense fallback={null}>
+      <HeaderGadgetsInner {...props} />
+    </Suspense>
   );
 }
