@@ -1,14 +1,35 @@
 /**
  * plugin/gadgets/product/Layout.tsx
  *
- * Gadgets Product Details Layout — Server Component (SSR).
- * Pre-processes product data, images, variates, seller information,
- * category breadcrumbs, specification data, and automatically resolves
- * 3 related category products for instant side-by-side comparison.
+ * Gadgets Product Details Layout — 100% Server Component (SSR).
+ *
+ * Pre-renders all static layout sections on the server for instant page load:
+ *  - Breadcrumb navigation
+ *  - Top Hero & Purchasing (interactive gallery, swatches, quantity & cart actions via GadgetsProductDetails heroOnly)
+ *  - CMS Builder (if configured)
+ *  - Sticky Anchor Navigation bar (#visual-description, #description, #specifications, #compare, #reviews, #product-videos, #related-products)
+ *  - Full Main Product Description (SSR HTML with smooth expand/collapse)
+ *  - Side-by-Side Automatic Comparison
+ *  - High-Fidelity Visual Description
+ *  - Complete Your Setup (Frequently Bought Together)
+ *  - Technical Hardware Specifications
+ *  - Verified Customer Reviews & Ratings
+ *  - YouTube Product Video Showcase
+ *  - Related Category Products Grid
  */
 
 import React from "react";
+import Link from "next/link";
+import { Icon } from "@iconify/react";
 import GadgetsProductDetails from "./Details";
+import GadgetsDescription from "./Description";
+import GadgetsSpecification, { type SpecBox } from "./Specification";
+import GadgetsCompare, { type CompareProductItem } from "./Compare";
+import GadgetsFrequencyTogether, { type SetupProductItem } from "./FrequencyTogether";
+import GadgetsReviews, { type ReviewsData } from "./Reviews";
+import GadgetsVideos, { type VideoItem } from "./Videos";
+import GadgetsRelated from "./Related";
+import GadgetsVisualDescription from "./VisualDescription";
 
 interface ProductPageProps {
     data: {
@@ -42,7 +63,7 @@ interface ProductPageProps {
         frequentlyTogether?: any[] | null;
         flashSaleCampaign?: any | null;
         brand?: { _id: string; title: string; slug: string } | null;
-        reviewsData?: any | null;
+        reviewsData?: ReviewsData | null;
     };
     builder?: React.ReactNode;
 }
@@ -59,6 +80,62 @@ function parseJson<T>(raw: string | undefined, fallback: T): T {
 function buildUrl(prefix: string, slug: string): string {
     const p = prefix.trim().replace(/^\/+|\/+$/g, "");
     return p ? `/${p}/${slug}` : `/${slug}`;
+}
+
+function mapToCompareItem(p: any, productPrefix: string): CompareProductItem | null {
+    if (!p) return null;
+    let pSpecs: SpecBox[] = [];
+    if (Array.isArray(p.specifications) && p.specifications.length > 0) {
+        pSpecs = p.specifications;
+    } else if (p.info?._specifications) {
+        try {
+            pSpecs = JSON.parse(p.info._specifications);
+        } catch {}
+    }
+
+    let pImage = p.image || "";
+    if (!pImage && p.info?.images) {
+        try {
+            const imgs = JSON.parse(p.info.images || "[]");
+            if (Array.isArray(imgs) && imgs[0]) pImage = imgs[0];
+        } catch {}
+    }
+    if (!pImage && p.info?.thumbnail) {
+        pImage = p.info.thumbnail;
+    }
+
+    let pPrice = p.price || 0;
+    let pStock = p.stock !== undefined ? p.stock : 99;
+    if (!pPrice && p.info?._variate) {
+        try {
+            const variate = JSON.parse(p.info._variate || "{}");
+            pPrice = parseFloat(variate.sellingprice || variate.regularprice || p.info?.sellingprice || "0") || 0;
+            pStock = parseInt(variate.stock || "99", 10);
+        } catch {}
+    }
+
+    const cleanSpecs = (pSpecs || [])
+        .map((box) => ({
+            ...box,
+            fields: (box.fields || []).filter(
+                (f: any) => typeof f?.description === "string" && f.description.trim().length > 0
+            ),
+        }))
+        .filter((box) => box.fields.length > 0);
+
+    if (cleanSpecs.length === 0) return null;
+
+    const pid = String(p.id || p._id || "");
+    return {
+        id: pid,
+        title: String(p.title || ""),
+        slug: String(p.slug || ""),
+        image: pImage,
+        price: pPrice,
+        stock: pStock,
+        specifications: cleanSpecs,
+        url: p.url || `/${productPrefix}/${p.slug}`,
+    };
 }
 
 export default function GadgetsProductLayout({
@@ -87,8 +164,16 @@ export default function GadgetsProductLayout({
     const defaultImages: string[] = parseJson<string[]>(data.info?.images, []);
     const allImages = [...new Set([...defaultImages, ...variantImages])].filter(Boolean);
 
-    // Parse structured specifications
-    const specifications: any[] = parseJson<any[]>(data.info?._specifications, []);
+    // Clean specifications for Technical Specifications and Compare
+    const rawSpecs: SpecBox[] = parseJson<SpecBox[]>(data.info?._specifications, []);
+    const validSpecifications: SpecBox[] = rawSpecs
+        .map((box) => ({
+            ...box,
+            fields: (box.fields || []).filter(
+                (f) => typeof f?.description === "string" && f.description.trim().length > 0
+            ),
+        }))
+        .filter((box) => box.fields && box.fields.length > 0);
 
     // Global settings & currency
     const currencySymbol =
@@ -109,7 +194,7 @@ export default function GadgetsProductLayout({
 
     // Parse product videos from pro_videos or videos
     const rawVideos = data.info?.pro_videos || data.info?.videos || data.info?._videos || "[]";
-    const videos: { title: string; videoid: string }[] = parseJson<any[]>(rawVideos, [])
+    const videos: VideoItem[] = parseJson<any[]>(rawVideos, [])
         .filter((v: any) => v && (v.videoid || v.videoId))
         .map((v: any) => ({
             title: String(v.title || "").trim(),
@@ -134,6 +219,7 @@ export default function GadgetsProductLayout({
     const categoryProducts = pageData?.categoryProducts ?? [];
     const frequentlyTogether = pageData?.frequentlyTogether ?? [];
     const flashSaleCampaign = pageData?.flashSaleCampaign ?? null;
+    const reviewsData = pageData?.reviewsData ?? null;
 
     // Breadcrumb category links
     const catPrefix = (permalinkMap["product-category"] ?? "product/category")
@@ -160,79 +246,258 @@ export default function GadgetsProductLayout({
           }
         : null;
 
-    // ── Automatic Comparison Selection: Up to 3 related category products with specifications ──
-    const compareProducts = (pageData?.compareProducts && pageData.compareProducts.length > 0)
-        ? pageData.compareProducts
-        : categoryProducts
-            .filter((p: any) => {
-                if (String(p._id) === String(data._id)) return false;
-                if (!p.info?._specifications) return false;
-                try {
-                    const parsed = JSON.parse(p.info._specifications);
-                    if (!Array.isArray(parsed) || parsed.length === 0) return false;
-                    return parsed.some((box: any) =>
-                        Array.isArray(box.fields) &&
-                        box.fields.some((f: any) => typeof f?.description === "string" && f.description.trim().length > 0)
-                    );
-                } catch {
-                    return false;
-                }
-            })
-            .slice(0, 3);
+    const productPrefix = (permalinkMap["product"] ?? "product").trim().replace(/^\/+|\/+$/g, "");
 
-    const allCompareCandidates = (pageData?.allCompareCandidates && pageData.allCompareCandidates.length > 0)
+    // ── Comparison Selection ──
+    const compareSource = (pageData?.compareProducts && pageData.compareProducts.length > 0)
+        ? pageData.compareProducts
+        : categoryProducts;
+
+    const parsedCompareCandidates: CompareProductItem[] = (compareSource || [])
+        .filter((p: any) => String(p.id || p._id) !== String(data._id))
+        .map((p: any) => mapToCompareItem(p, productPrefix))
+        .filter((p): p is CompareProductItem => p !== null)
+        .slice(0, 3);
+
+    const allComparePool = (pageData?.allCompareCandidates && pageData.allCompareCandidates.length > 0)
         ? pageData.allCompareCandidates
         : categoryProducts;
 
+    const allCategoryCompareCandidates: CompareProductItem[] = (allComparePool || [])
+        .filter((p: any) => String(p.id || p._id) !== String(data._id))
+        .map((p: any) => mapToCompareItem(p, productPrefix))
+        .filter((p): p is CompareProductItem => p !== null);
+
+    const currentCompareItem: CompareProductItem = {
+        id: String(data._id),
+        title: data.title,
+        slug: data.slug,
+        image: allImages[0] || "",
+        price: displayPrice,
+        stock: singleStock,
+        specifications: validSpecifications,
+        url: "#",
+    };
+
+    const hasOverview = Boolean((htmlDescription || description)?.trim());
+    const visualDescription =
+        (typeof data.info?._visual_description === "string" ? data.info._visual_description : "") ||
+        (typeof data.info?.visual_description === "string" ? data.info.visual_description : "");
+    const hasVisualDescription = Boolean(visualDescription?.trim());
+
     return (
-        <GadgetsProductDetails
-            data={{ id: String(data._id), title: data.title, slug: data.slug }}
-            info={data.info || {}}
-            productId={String(data._id)}
-            categoryId={data.category ?? null}
-            priceType={priceType}
-            regularPrice={regularPrice}
-            sellingPrice={sellingPrice}
-            displayPrice={displayPrice}
-            hasDiscount={hasDiscount}
-            discountPercent={discountPercent}
-            singleStock={singleStock}
-            variants={variants}
-            selectedAttributes={selectedAttributes}
-            variantDisplayStyle={variantDisplayStyle}
-            allImages={allImages}
-            specifications={specifications}
-            videos={videos}
-            currencySymbol={currencySymbol}
-            whatsappNumber={whatsappNumber}
-            telegramUsername={telegramUsername}
-            facebookPageId={facebookPageId}
-            shortDescription={shortDescription}
-            description={description}
-            htmlDescription={htmlDescription}
-            orderNote={orderNote}
-            warranty={warranty}
-            shippingInside={shippingInside}
-            shippingOutside={shippingOutside}
-            categoryLinks={categoryLinks}
-            categoryProducts={categoryProducts}
-            compareProducts={compareProducts}
-            allCompareCandidates={allCompareCandidates}
-            frequentlyTogether={frequentlyTogether}
-            flashSaleCampaign={flashSaleCampaign}
-            brand={brand}
-            permalinkMap={permalinkMap}
-            builder={builder}
-            reviewsData={pageData?.reviewsData ?? null}
-            settings={settings}
-            seller={
-                seller
-                    ? {
-                          ...seller,
-                          profileUrl: buildUrl(sellerPrefix, seller.slug),
-                      }
-                    : null
-            }
-        />
+        <div className="min-h-screen">
+            {/* ─── 1. TOP BREADCRUMB BAR (SSR) ─── */}
+            <div className="bg-white border-b border-gray-200/80">
+                <div className="container py-3">
+                    <nav className="flex items-center gap-2 text-xs text-gray-500 overflow-x-auto whitespace-nowrap scrollbar-none">
+                        <Link href="/" className="hover:text-blue-600 transition flex items-center gap-1">
+                            <Icon icon="solar:home-2-linear" width={14} />
+                            <span>Home</span>
+                        </Link>
+                        {categoryLinks.map((cat, idx) => (
+                            <React.Fragment key={idx}>
+                                <Icon icon="solar:alt-arrow-right-linear" width={12} className="text-gray-400" />
+                                <Link href={cat.url} className="hover:text-blue-600 transition font-medium">
+                                    {cat.title}
+                                </Link>
+                            </React.Fragment>
+                        ))}
+                        <Icon icon="solar:alt-arrow-right-linear" width={12} className="text-gray-400" />
+                        <span className="text-gray-900 font-semibold truncate max-w-xs">{data.title}</span>
+                    </nav>
+                </div>
+            </div>
+
+            {/* ─── 2. TOP HERO SECTION: GALLERY + PURCHASING + TRUST BADGES ─── */}
+            <div className="container py-6 space-y-8">
+                <GadgetsProductDetails
+                    heroOnly={true}
+                    data={{ id: String(data._id), title: data.title, slug: data.slug }}
+                    info={data.info || {}}
+                    productId={String(data._id)}
+                    categoryId={data.category ?? null}
+                    priceType={priceType}
+                    regularPrice={regularPrice}
+                    sellingPrice={sellingPrice}
+                    displayPrice={displayPrice}
+                    hasDiscount={hasDiscount}
+                    discountPercent={discountPercent}
+                    singleStock={singleStock}
+                    variants={variants}
+                    selectedAttributes={selectedAttributes}
+                    variantDisplayStyle={variantDisplayStyle}
+                    allImages={allImages}
+                    specifications={validSpecifications}
+                    videos={videos}
+                    currencySymbol={currencySymbol}
+                    whatsappNumber={whatsappNumber}
+                    telegramUsername={telegramUsername}
+                    facebookPageId={facebookPageId}
+                    shortDescription={shortDescription}
+                    description={description}
+                    htmlDescription={htmlDescription}
+                    orderNote={orderNote}
+                    warranty={warranty}
+                    shippingInside={shippingInside}
+                    shippingOutside={shippingOutside}
+                    categoryLinks={categoryLinks}
+                    categoryProducts={categoryProducts}
+                    compareProducts={compareSource}
+                    allCompareCandidates={allComparePool}
+                    frequentlyTogether={frequentlyTogether}
+                    flashSaleCampaign={flashSaleCampaign}
+                    brand={brand}
+                    permalinkMap={permalinkMap}
+                    builder={builder}
+                    reviewsData={reviewsData}
+                    settings={settings}
+                    seller={
+                        seller
+                            ? {
+                                  ...seller,
+                                  profileUrl: buildUrl(sellerPrefix, seller.slug),
+                              }
+                            : null
+                    }
+                />
+
+                {/* ─── CMS BUILDER (IF PRESENT) ─── */}
+                {builder}
+
+                {/* ─── 3. STICKY ANCHOR BAR (SSR) ─── */}
+                <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-md rounded-2xl border border-gray-200 p-1.5 shadow-xs flex items-center gap-1 overflow-x-auto scrollbar-none">
+                    {hasVisualDescription && (
+                        <a
+                            href="#visual-description"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition whitespace-nowrap flex items-center gap-1.5"
+                        >
+                            <Icon icon="solar:layers-minimalistic-bold" width={14} className="text-blue-600" />
+                            <span>Visual Overview</span>
+                        </a>
+                    )}
+                    {hasOverview && (
+                        <a
+                            href="#description"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition whitespace-nowrap"
+                        >
+                            Description
+                        </a>
+                    )}
+                    {validSpecifications.length > 0 && (
+                        <a
+                            href="#specifications"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition whitespace-nowrap flex items-center gap-1.5"
+                        >
+                            <span>Specifications</span>
+                            <span className="px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-700 text-[10px]">
+                                {validSpecifications.length}
+                            </span>
+                        </a>
+                    )}
+                    {parsedCompareCandidates.length > 0 && (
+                        <a
+                            href="#compare"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/70 transition whitespace-nowrap flex items-center gap-1.5"
+                        >
+                            <span>Compare</span>
+                            <span className="px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-700 text-[10px]">
+                                {parsedCompareCandidates.length}
+                            </span>
+                        </a>
+                    )}
+                    {frequentlyTogether && frequentlyTogether.length > 0 && (
+                        <a
+                            href="#complete-setup"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition whitespace-nowrap"
+                        >
+                            Complete Setup
+                        </a>
+                    )}
+                    <a
+                        href="#reviews"
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-amber-600 hover:bg-amber-50/70 transition whitespace-nowrap flex items-center gap-1.5"
+                    >
+                        <span>Reviews</span>
+                        <span className="px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-700 text-[10px]">
+                            {reviewsData?.totalReviews || 0}
+                        </span>
+                    </a>
+                    {videos && videos.length > 0 && (
+                        <a
+                            href="#product-videos"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-red-600 hover:bg-red-50/70 transition whitespace-nowrap flex items-center gap-1.5"
+                        >
+                            <Icon icon="logos:youtube-icon" width={14} />
+                            <span>Videos</span>
+                            <span className="px-1.5 py-0.2 rounded-full bg-red-100 text-red-700 text-[10px]">
+                                {videos.length}
+                            </span>
+                        </a>
+                    )}
+                    {categoryProducts && categoryProducts.length > 0 && (
+                        <a
+                            href="#related-products"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition whitespace-nowrap"
+                        >
+                            Related Gadgets
+                        </a>
+                    )}
+                </div>
+
+                {/* ─── 4. MAIN PRODUCT DESCRIPTION (SSR WITH TOGGLE) ─── */}
+                {hasOverview && (
+                    <GadgetsDescription html={htmlDescription || description} />
+                )}
+
+                {/* ─── 5. AUTOMATIC COMPARE COMPONENT (SSR) ─── */}
+                {validSpecifications.length > 0 && parsedCompareCandidates.length > 0 && (
+                    <GadgetsCompare
+                        currentProduct={currentCompareItem}
+                        compareProducts={parsedCompareCandidates}
+                        allAvailableProducts={allCategoryCompareCandidates}
+                        currencySymbol={currencySymbol}
+                    />
+                )}
+            </div>
+
+            {/* ─── 6. VISUAL DESCRIPTION (SSR) ─── */}
+            {hasVisualDescription && (
+                <GadgetsVisualDescription data={visualDescription} productTitle={data.title} />
+            )}
+
+            <div className="container py-6 space-y-8">
+                {/* ─── 7. COMPLETE YOUR SETUP (FREQUENTLY BOUGHT TOGETHER) ─── */}
+                {frequentlyTogether && frequentlyTogether.length > 0 && (
+                    <GadgetsFrequencyTogether
+                        products={frequentlyTogether}
+                        currencySymbol={currencySymbol}
+                        currentProductTitle={data.title}
+                    />
+                )}
+
+                {/* ─── 8. SPECIFICATIONS COMPONENT (SSR) ─── */}
+                {validSpecifications.length > 0 && (
+                    <GadgetsSpecification specifications={validSpecifications} productTitle={data.title} />
+                )}
+
+                {/* ─── 9. REVIEWS COMPONENT (SSR) ─── */}
+                <GadgetsReviews reviewsData={reviewsData} productTitle={data.title} productId={String(data._id)} />
+
+                {/* ─── 10. PRODUCT VIDEOS COMPONENT (SSR) ─── */}
+                {videos && videos.length > 0 && (
+                    <GadgetsVideos videos={videos} productTitle={data.title} />
+                )}
+
+                {/* ─── 11. RELATED CATEGORY PRODUCTS COMPONENT (SSR) ─── */}
+                <GadgetsRelated
+                    categoryProducts={categoryProducts}
+                    settings={settings}
+                    permalinkMap={permalinkMap}
+                    currencySymbol={currencySymbol}
+                    productTitle={data.title}
+                />
+            </div>
+        </div>
     );
 }

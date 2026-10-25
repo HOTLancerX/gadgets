@@ -1,9 +1,7 @@
-"use client";
-
 /**
  * cms/plugin/gadgets/product/VisualDescription.tsx
  *
- * Gadgets Product Details — Visual Description Component (SSR-ready).
+ * Gadgets Product Details — Visual Description Component (SSR Server Component).
  * Renders structured visual blocks, high-fidelity source styles, sliders, and responsive layouts.
  */
 

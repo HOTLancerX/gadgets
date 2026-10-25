@@ -1,9 +1,7 @@
-"use client";
-
 /**
  * plugin/gadgets/product/Related.tsx
  *
- * Related Category Products Component:
+ * Related Category Products Component — Server Component (SSR).
  *  - Responsive grid layout computed dynamically from desktop, tablet, and mobile inputs.
  *  - Follows "Related Products Layout Settings" in CategoryPageSettings.tsx:
  *      • related_products_cols (Desktop columns per line: 2, 3, 4, 5, 6)
@@ -13,7 +11,7 @@
  *  - Renders each product using GadgetsBox1 tech card.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Icon } from "@iconify/react";
 import GadgetsBox1 from "../box/Box-1";
 
@@ -55,9 +53,7 @@ export default function GadgetsRelated({
         : 5;
 
     // Limit products to the configured total
-    const displayedProducts = useMemo(() => {
-        return (categoryProducts || []).slice(0, relatedTotal);
-    }, [categoryProducts, relatedTotal]);
+    const displayedProducts = (categoryProducts || []).slice(0, relatedTotal);
 
     const productPrefix = (permalinkMap["product"] ?? "product").trim().replace(/^\/+|\/+$/g, "");
 
