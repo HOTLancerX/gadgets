@@ -33,7 +33,7 @@ export default function LazyVisualDescription({
                 aria-label="Visual Product Overview"
                 className="container py-8"
             >
-                <div className="w-full rounded-3xl bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 border border-gray-200/80 p-8 md:p-12 flex flex-col items-center justify-center text-center animate-pulse min-h-[300px] shadow-2xs">
+                <div className="w-full rounded-3xl bg-linear-to-r from-gray-50 via-gray-100 to-gray-50 border border-gray-200/80 p-8 md:p-12 flex flex-col items-center justify-center text-center animate-pulse min-h-75 shadow-2xs">
                     <div className="w-12 h-12 rounded-2xl bg-white border border-gray-200 flex items-center justify-center shadow-xs mb-4 text-blue-600">
                         <Icon icon="solar:layers-minimalistic-bold" className="animate-spin" width={24} />
                     </div>
