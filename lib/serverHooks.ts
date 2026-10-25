@@ -9,28 +9,14 @@
 import { registerProductEnricher } from "@/hook/serverDataHooks";
 import { getSmartFrequentlyTogether, getSmartCategoryCompareProducts } from "./recommendations";
 
-registerProductEnricher(async (pageData, postData) => {
-    try {
-        const ancestors = pageData?.ancestors ?? [];
-        const lastAncestor = ancestors.length > 0 ? ancestors[ancestors.length - 1] : null;
-        const brand = pageData?.brand ?? null;
-
-        const [frequentlyTogether, compareData] = await Promise.all([
-            getSmartFrequentlyTogether({
-                id: String(postData._id),
-                title: String(postData.title ?? ""),
-                brandTitle: brand?.title,
-                categoryTitle: lastAncestor?.title,
-            }),
-            getSmartCategoryCompareProducts(String(postData._id), postData.category),
-        ]);
-
-        return {
-            frequentlyTogether,
-            compareProducts: compareData.compareProducts,
-            allCompareCandidates: compareData.allCompareCandidates,
-        };
-    } catch {
-        return {};
-    }
+registerProductEnricher(async () => {
+    // Non-blocking for instant initial SSR.
+    // Heavy sections (Compare & Frequently Bought Together) load progressively
+    // on the client with elegant skeleton loaders via /api/gadgets/product-extra.
+    return {
+        frequentlyTogether: [],
+        compareProducts: [],
+        allCompareCandidates: [],
+    };
 });
+

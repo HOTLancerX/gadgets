@@ -30,6 +30,9 @@ import GadgetsReviews, { type ReviewsData } from "./Reviews";
 import GadgetsVideos, { type VideoItem } from "./Videos";
 import GadgetsRelated from "./Related";
 import GadgetsVisualDescription from "./VisualDescription";
+import LazyCompare from "./LazyCompare";
+import LazyFrequencyTogether from "./LazyFrequencyTogether";
+import LazyVisualDescription from "./LazyVisualDescription";
 
 interface ProductPageProps {
     data: {
@@ -446,31 +449,39 @@ export default function GadgetsProductLayout({
                     <GadgetsDescription html={htmlDescription || description} />
                 )}
 
-                {/* ─── 5. AUTOMATIC COMPARE COMPONENT (SSR) ─── */}
-                {validSpecifications.length > 0 && parsedCompareCandidates.length > 0 && (
-                    <GadgetsCompare
+                {/* ─── 5. AUTOMATIC COMPARE COMPONENT (PROGRESSIVE LOAD WITH SKELETON) ─── */}
+                {validSpecifications.length > 0 && (
+                    <LazyCompare
+                        productId={String(data._id)}
+                        productTitle={data.title}
+                        categoryId={data.category ?? null}
+                        categoryTitle={ancestors.length > 0 ? ancestors[ancestors.length - 1]?.title : undefined}
+                        brandTitle={brand?.title}
                         currentProduct={currentCompareItem}
-                        compareProducts={parsedCompareCandidates}
-                        allAvailableProducts={allCategoryCompareCandidates}
                         currencySymbol={currencySymbol}
+                        initialCompareProducts={parsedCompareCandidates}
+                        initialAllCandidates={allCategoryCompareCandidates}
+                        productPrefix={productPrefix}
                     />
                 )}
             </div>
 
-            {/* ─── 6. VISUAL DESCRIPTION (SSR) ─── */}
+            {/* ─── 6. VISUAL DESCRIPTION (PROGRESSIVE LOAD WITH SKELETON) ─── */}
             {hasVisualDescription && (
-                <GadgetsVisualDescription data={visualDescription} productTitle={data.title} />
+                <LazyVisualDescription data={visualDescription} productTitle={data.title} />
             )}
 
             <div className="container py-6 space-y-8">
-                {/* ─── 7. COMPLETE YOUR SETUP (FREQUENTLY BOUGHT TOGETHER) ─── */}
-                {frequentlyTogether && frequentlyTogether.length > 0 && (
-                    <GadgetsFrequencyTogether
-                        products={frequentlyTogether}
-                        currencySymbol={currencySymbol}
-                        currentProductTitle={data.title}
-                    />
-                )}
+                {/* ─── 7. COMPLETE YOUR SETUP (PROGRESSIVE LOAD WITH SKELETON) ─── */}
+                <LazyFrequencyTogether
+                    productId={String(data._id)}
+                    productTitle={data.title}
+                    categoryId={data.category ?? null}
+                    categoryTitle={ancestors.length > 0 ? ancestors[ancestors.length - 1]?.title : undefined}
+                    brandTitle={brand?.title}
+                    currencySymbol={currencySymbol}
+                    initialProducts={frequentlyTogether}
+                />
 
                 {/* ─── 8. SPECIFICATIONS COMPONENT (SSR) ─── */}
                 {validSpecifications.length > 0 && (
