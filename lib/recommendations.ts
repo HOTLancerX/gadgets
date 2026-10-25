@@ -305,6 +305,26 @@ export async function getSmartFrequentlyTogether(
     }
 
     if (targetPostIds.length === 0) {
+        const anyFallback = (await Post.find({
+            type: "product",
+            status: "published",
+            _id: {
+                $ne: source.id && mongoose.Types.ObjectId.isValid(source.id)
+                    ? new mongoose.Types.ObjectId(source.id)
+                    : source.id,
+            },
+        })
+            .limit(6)
+            .select("_id")
+            .lean()) as any[];
+
+        for (const item of anyFallback) {
+            targetPostIds.push(item._id);
+            groupMapping[String(item._id)] = "Recommended";
+        }
+    }
+
+    if (targetPostIds.length === 0) {
         return [];
     }
 
@@ -516,6 +536,40 @@ export async function getSmartCategoryCompareProducts(
 
         const validPostIdStrings = new Set(validSpecPostIds.map((id) => String(id)));
         candidatePosts = candidatePosts.filter((p) => validPostIdStrings.has(String(p._id)));
+
+        // Fallback: If no candidate in the exact category has specifications, fetch products that DO have specifications
+        if (candidatePosts.length === 0) {
+            const anySpecInfos = (await PostInfo.find({
+                name: "_specifications",
+                postId: {
+                    $ne: productId && mongoose.Types.ObjectId.isValid(productId)
+                        ? new mongoose.Types.ObjectId(productId)
+                        : productId,
+                },
+            })
+                .limit(10)
+                .lean()) as any[];
+
+            const fallbackIds = anySpecInfos.map((s) => s.postId).filter(Boolean);
+            if (fallbackIds.length > 0) {
+                candidatePosts = (await Post.find({
+                    _id: { $in: fallbackIds },
+                    type: "product",
+                    status: "published",
+                })
+                    .limit(6)
+                    .lean()) as any[];
+
+                for (const s of anySpecInfos) {
+                    try {
+                        const parsed = JSON.parse(s.value || "[]");
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            specMap[String(s.postId)] = parsed;
+                        }
+                    } catch {}
+                }
+            }
+        }
 
         if (candidatePosts.length === 0) {
             return { compareProducts: [], allCompareCandidates: [] };

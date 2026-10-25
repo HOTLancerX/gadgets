@@ -272,6 +272,20 @@ export default function GadgetsProductLayout({
         .filter((p): p is CompareProductItem => p !== null)
         .slice(0, 5);
 
+    const compareSpecifications: SpecBox[] = validSpecifications.length > 0
+        ? validSpecifications
+        : [
+              {
+                  title: "Key Specifications",
+                  fields: [
+                      { title: "Brand", description: brand?.title || "Standard" },
+                      { title: "Price", description: `${currencySymbol} ${Number(displayPrice).toLocaleString()}` },
+                      { title: "Stock Status", description: singleStock > 0 ? "In Stock" : "Available to Order" },
+                      { title: "Edition / Model", description: data.title },
+                  ],
+              },
+          ];
+
     const currentCompareItem: CompareProductItem = {
         id: String(data._id),
         title: data.title,
@@ -279,7 +293,7 @@ export default function GadgetsProductLayout({
         image: allImages[0] || "",
         price: displayPrice,
         stock: singleStock,
-        specifications: validSpecifications,
+        specifications: compareSpecifications,
         url: "#",
     };
 
@@ -394,25 +408,20 @@ export default function GadgetsProductLayout({
                             </span>
                         </a>
                     )}
-                    {parsedCompareCandidates.length > 0 && (
-                        <a
-                            href="#compare"
-                            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/70 transition whitespace-nowrap flex items-center gap-1.5"
-                        >
-                            <span>Compare</span>
-                            <span className="px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-700 text-[10px]">
-                                {parsedCompareCandidates.length}
-                            </span>
-                        </a>
-                    )}
-                    {frequentlyTogether && frequentlyTogether.length > 0 && (
-                        <a
-                            href="#complete-setup"
-                            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition whitespace-nowrap"
-                        >
-                            Complete Setup
-                        </a>
-                    )}
+                    <a
+                        href="#compare"
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/70 transition whitespace-nowrap flex items-center gap-1.5"
+                    >
+                        <Icon icon="solar:round-transfer-vertical-bold" width={14} className="text-indigo-600" />
+                        <span>Compare</span>
+                    </a>
+                    <a
+                        href="#complete-setup"
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50/70 transition whitespace-nowrap flex items-center gap-1.5"
+                    >
+                        <Icon icon="solar:widget-add-bold" width={14} className="text-blue-600" />
+                        <span>Complete Setup</span>
+                    </a>
                     <a
                         href="#reviews"
                         className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 hover:text-amber-600 hover:bg-amber-50/70 transition whitespace-nowrap flex items-center gap-1.5"
@@ -450,20 +459,18 @@ export default function GadgetsProductLayout({
                 )}
 
                 {/* ─── 5. AUTOMATIC COMPARE COMPONENT (PROGRESSIVE LOAD WITH SKELETON) ─── */}
-                {validSpecifications.length > 0 && (
-                    <LazyCompare
-                        productId={String(data._id)}
-                        productTitle={data.title}
-                        categoryId={data.category ?? null}
-                        categoryTitle={ancestors.length > 0 ? ancestors[ancestors.length - 1]?.title : undefined}
-                        brandTitle={brand?.title}
-                        currentProduct={currentCompareItem}
-                        currencySymbol={currencySymbol}
-                        initialCompareProducts={parsedCompareCandidates}
-                        initialAllCandidates={allCategoryCompareCandidates}
-                        productPrefix={productPrefix}
-                    />
-                )}
+                <LazyCompare
+                    productId={String(data._id)}
+                    productTitle={data.title}
+                    categoryId={data.category ?? null}
+                    categoryTitle={ancestors.length > 0 ? ancestors[ancestors.length - 1]?.title : undefined}
+                    brandTitle={brand?.title}
+                    currentProduct={currentCompareItem}
+                    currencySymbol={currencySymbol}
+                    initialCompareProducts={parsedCompareCandidates}
+                    initialAllCandidates={allCategoryCompareCandidates}
+                    productPrefix={productPrefix}
+                />
             </div>
 
             {/* ─── 6. VISUAL DESCRIPTION (PROGRESSIVE LOAD WITH SKELETON) ─── */}

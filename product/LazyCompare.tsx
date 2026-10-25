@@ -59,11 +59,23 @@ export default function LazyCompare({
                     const mappedCompare: CompareProductItem[] = rawList
                         .filter((p: any) => String(p.id || p._id) !== String(productId))
                         .map((p: any) => {
-                            if (p.specifications && p.specifications.length > 0) return p;
-                            let pSpecs = [];
-                            try {
-                                if (p.info?._specifications) pSpecs = JSON.parse(p.info._specifications);
-                            } catch {}
+                            let pSpecs = Array.isArray(p.specifications) ? p.specifications : [];
+                            if (pSpecs.length === 0 && p.info?._specifications) {
+                                try {
+                                    pSpecs = JSON.parse(p.info._specifications);
+                                } catch {}
+                            }
+                            if (!Array.isArray(pSpecs) || pSpecs.length === 0) {
+                                pSpecs = [
+                                    {
+                                        title: "Overview",
+                                        fields: [
+                                            { title: "Product", description: p.title || "Alternative Product" },
+                                            { title: "Status", description: "Available" },
+                                        ],
+                                    },
+                                ];
+                            }
                             return {
                                 id: String(p.id || p._id),
                                 title: String(p.title || ""),
@@ -72,20 +84,31 @@ export default function LazyCompare({
                                 price: Number(p.price || p.info?.sellingprice || 0),
                                 stock: p.stock !== undefined ? p.stock : 99,
                                 specifications: pSpecs,
-                                url: `/${productPrefix}/${p.slug}`,
+                                url: p.url || `/${productPrefix}/${p.slug}`,
                             };
                         })
-                        .filter((p: any) => p && Array.isArray(p.specifications) && p.specifications.length > 0)
                         .slice(0, 3);
 
                     const mappedCandidates: CompareProductItem[] = (allPool.length > 0 ? allPool : rawList)
                         .filter((p: any) => String(p.id || p._id) !== String(productId))
                         .map((p: any) => {
-                            if (p.specifications && p.specifications.length > 0) return p;
-                            let pSpecs = [];
-                            try {
-                                if (p.info?._specifications) pSpecs = JSON.parse(p.info._specifications);
-                            } catch {}
+                            let pSpecs = Array.isArray(p.specifications) ? p.specifications : [];
+                            if (pSpecs.length === 0 && p.info?._specifications) {
+                                try {
+                                    pSpecs = JSON.parse(p.info._specifications);
+                                } catch {}
+                            }
+                            if (!Array.isArray(pSpecs) || pSpecs.length === 0) {
+                                pSpecs = [
+                                    {
+                                        title: "Overview",
+                                        fields: [
+                                            { title: "Product", description: p.title || "Alternative Product" },
+                                            { title: "Status", description: "Available" },
+                                        ],
+                                    },
+                                ];
+                            }
                             return {
                                 id: String(p.id || p._id),
                                 title: String(p.title || ""),
@@ -94,10 +117,9 @@ export default function LazyCompare({
                                 price: Number(p.price || p.info?.sellingprice || 0),
                                 stock: p.stock !== undefined ? p.stock : 99,
                                 specifications: pSpecs,
-                                url: `/${productPrefix}/${p.slug}`,
+                                url: p.url || `/${productPrefix}/${p.slug}`,
                             };
                         })
-                        .filter((p: any) => p && Array.isArray(p.specifications) && p.specifications.length > 0)
                         .slice(0, 5);
 
                     setCompareProducts(mappedCompare);
