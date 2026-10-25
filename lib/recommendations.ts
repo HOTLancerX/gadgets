@@ -424,7 +424,10 @@ export async function getSmartCategoryCompareProducts(
     productId: string,
     categoryId?: string | null
 ): Promise<{ compareProducts: any[]; allCompareCandidates: any[] }> {
-    return withCache(`gadgets:category_compare:${productId}`, async () => {
+    const cacheKey = categoryId
+        ? `gadgets:category_compare:${categoryId}`
+        : `gadgets:category_compare:${productId}`;
+    return withCache(cacheKey, async () => {
     try {
         const catDoc =
             categoryId && mongoose.Types.ObjectId.isValid(categoryId)
@@ -520,9 +523,10 @@ export async function getSmartCategoryCompareProducts(
 
         const postIds = candidatePosts.map((p) => p._id);
 
-        // Batch fetch postinfos for images and variates
+        // Batch fetch postinfos ONLY for necessary fields (images and variates) — avoids heavy timeout
         const infoDocs = (await PostInfo.find({
             postId: { $in: postIds },
+            name: { $in: ["images", "_variate", "thumbnail", "sellingprice", "price"] },
         }).lean()) as any[];
 
         const infoByPost: Record<string, Record<string, string>> = {};
@@ -582,8 +586,8 @@ export async function getSmartCategoryCompareProducts(
             compareProducts: formatted.slice(0, 3),
             allCompareCandidates: formatted,
         };
-    } catch (e) {
-        console.error("Error in getSmartCategoryCompareProducts:", e);
+    } catch (e: any) {
+        console.warn("[getSmartCategoryCompareProducts] Graceful fallback on network/timeout:", e?.message || e);
         return { compareProducts: [], allCompareCandidates: [] };
     }
     })();
