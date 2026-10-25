@@ -266,7 +266,8 @@ export default function GadgetsProductLayout({
     const allCategoryCompareCandidates: CompareProductItem[] = (allComparePool || [])
         .filter((p: any) => String(p.id || p._id) !== String(data._id))
         .map((p: any) => mapToCompareItem(p, productPrefix))
-        .filter((p): p is CompareProductItem => p !== null);
+        .filter((p): p is CompareProductItem => p !== null)
+        .slice(0, 5);
 
     const currentCompareItem: CompareProductItem = {
         id: String(data._id),
@@ -342,15 +343,10 @@ export default function GadgetsProductLayout({
                     shippingInside={shippingInside}
                     shippingOutside={shippingOutside}
                     categoryLinks={categoryLinks}
-                    categoryProducts={categoryProducts}
-                    compareProducts={compareSource}
-                    allCompareCandidates={allComparePool}
-                    frequentlyTogether={frequentlyTogether}
                     flashSaleCampaign={flashSaleCampaign}
                     brand={brand}
                     permalinkMap={permalinkMap}
                     builder={builder}
-                    reviewsData={reviewsData}
                     settings={settings}
                     seller={
                         seller

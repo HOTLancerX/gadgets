@@ -252,6 +252,7 @@ export default function GadgetsBox1({
                     {/* Centered Device Photo with Zoom Hover */}
                     <Link
                         href={href}
+                        prefetch={true}
                         className="w-full h-full flex items-center justify-center p-2 md:p-3"
                     >
                         {displayImg ? (
@@ -288,6 +289,7 @@ export default function GadgetsBox1({
                     {/* Product Title */}
                     <Link
                         href={href}
+                        prefetch={true}
                         className="block text-sm md:text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate tracking-tight"
                         title={data?.title}
                     >

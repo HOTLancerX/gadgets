@@ -215,6 +215,7 @@ export default function GadgetsFrequencyTogether({
                                 {/* Left: Product Thumbnail */}
                                 <Link
                                     href={item.url}
+                                    prefetch={true}
                                     className="w-20 h-20 md:w-22 md:h-22 rounded-xl bg-gray-50/50 p-1 shrink-0 flex items-center justify-center overflow-hidden border border-gray-100"
                                 >
                                     {item.image ? (
@@ -243,6 +244,7 @@ export default function GadgetsFrequencyTogether({
                                         {/* Product Title */}
                                         <Link
                                             href={item.url}
+                                            prefetch={true}
                                             className="text-xs md:text-sm font-bold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 mt-1 leading-snug"
                                             title={item.title}
                                         >

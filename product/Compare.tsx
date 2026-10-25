@@ -325,6 +325,7 @@ export default function GadgetsCompare({
                         <div className="mt-4">
                             <Link
                                 href={p.url || "#"}
+                                prefetch={true}
                                 className="block w-full py-2.5 text-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-2xs"
                             >
                                 Choose options

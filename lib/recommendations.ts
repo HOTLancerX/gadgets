@@ -19,6 +19,7 @@ import PostInfo from "@/models/post_info";
 import Cat from "@/models/cat";
 import Permalink from "@/models/permalink";
 import mongoose from "mongoose";
+import { withCache } from "@/lib/cache";
 import type { SetupProductItem } from "@/plugin/gadgets/product/FrequencyTogether";
 import type { VariantData } from "@/plugin/gadgets/box/VariantPopup";
 
@@ -69,9 +70,21 @@ interface SlotDefinition {
     regex: RegExp;
 }
 
+const getCandidateProductsPool = withCache("gadgets:candidates_pool", async () => {
+    return Post.find({
+        type: "product",
+        status: "published",
+    })
+        .sort({ createdAt: -1 })
+        .limit(300)
+        .select("_id title slug type category")
+        .lean() as Promise<any[]>;
+});
+
 export async function getSmartFrequentlyTogether(
     source: SourceProductContext
 ): Promise<SetupProductItem[]> {
+    return withCache(`gadgets:frequently_together:${source.id}`, async () => {
     const sourceTitle = source.title || "";
     const sourceTokens = tokenize(sourceTitle);
     const sourceDeviceNouns = extractDeviceNouns(sourceTokens);
@@ -113,21 +126,19 @@ export async function getSmartFrequentlyTogether(
               { label: "Power banks", regex: /power bank|powerbank|battery pack/i },
           ];
 
-    // Query candidate products per slot
+    // Query candidate products per slot from local in-memory pool (0ms instant lookup)
+    const allCandidates = await getCandidateProductsPool();
     const targetPostIds: any[] = [];
     const groupMapping: Record<string, string> = {};
     const usedIds = new Set<string>([source.id]);
 
     for (const slot of slots) {
-        const candidates = (await Post.find({
-            type: "product",
-            status: "published",
-            _id: { $ne: source.id, $nin: targetPostIds },
-            title: { $regex: slot.regex },
-        })
-            .limit(60)
-            .select("_id title slug type")
-            .lean()) as any[];
+        const candidates = allCandidates.filter(
+            (c) =>
+                String(c._id) !== source.id &&
+                !targetPostIds.some((tid) => String(tid) === String(c._id)) &&
+                slot.regex.test(c.title || "")
+        );
 
         const scored: { cand: any; score: number }[] = [];
 
@@ -402,6 +413,7 @@ export async function getSmartFrequentlyTogether(
     }
 
     return results;
+    })();
 }
 
 /**
@@ -412,6 +424,7 @@ export async function getSmartCategoryCompareProducts(
     productId: string,
     categoryId?: string | null
 ): Promise<{ compareProducts: any[]; allCompareCandidates: any[] }> {
+    return withCache(`gadgets:category_compare:${productId}`, async () => {
     try {
         const catDoc =
             categoryId && mongoose.Types.ObjectId.isValid(categoryId)
@@ -448,7 +461,7 @@ export async function getSmartCategoryCompareProducts(
             };
         }
 
-        let candidatePosts = (await Post.find(query).limit(20).lean()) as any[];
+        let candidatePosts = (await Post.find(query).limit(8).lean()) as any[];
 
         // Fallback: If no candidate found in exact related categories, search across recent published products
         if (candidatePosts.length === 0) {
@@ -458,7 +471,7 @@ export async function getSmartCategoryCompareProducts(
                 ...(productId && mongoose.Types.ObjectId.isValid(productId)
                     ? { _id: { $ne: new mongoose.Types.ObjectId(productId) } }
                     : {}),
-            }).limit(20).lean()) as any[];
+            }).limit(8).lean()) as any[];
         }
 
         if (candidatePosts.length === 0) {
@@ -573,5 +586,6 @@ export async function getSmartCategoryCompareProducts(
         console.error("Error in getSmartCategoryCompareProducts:", e);
         return { compareProducts: [], allCompareCandidates: [] };
     }
+    })();
 }
 

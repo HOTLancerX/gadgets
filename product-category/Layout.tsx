@@ -1000,7 +1000,7 @@ function GadgetProductCard({
                     "--h-desk": `${leadImageHeightDesktop ?? 210}px`,
                 } as React.CSSProperties}
             >
-                <Link href={productUrl} className="w-full h-full flex items-center justify-center">
+                <Link href={productUrl} prefetch={true} className="w-full h-full flex items-center justify-center">
                     {displayImg ? (
                         <Image
                             src={displayImg}
@@ -1036,6 +1036,7 @@ function GadgetProductCard({
                     {/* Product Title */}
                     <Link
                         href={productUrl}
+                        prefetch={true}
                         className="block text-sm md:text-base font-bold text-gray-900 line-clamp-1 group-hover:text-[#0053e2] transition-colors mb-1.5"
                         title={product.title}
                     >
