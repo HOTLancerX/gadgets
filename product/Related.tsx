@@ -25,7 +25,8 @@ interface RelatedProps {
 
 function buildUrl(prefix: string, slug: string): string {
     const p = prefix.trim().replace(/^\/+|\/+$/g, "");
-    return p ? `/${p}/${slug}` : `/${slug}`;
+    const s = String(slug || "").trim().replace(/^\/+|\/+$/g, "");
+    return p ? (s ? `/${p}/${s}` : `/${p}`) : `/${s}`;
 }
 
 export default function GadgetsRelated({
@@ -101,7 +102,7 @@ export default function GadgetsRelated({
                     <GadgetsBox1
                         key={item._id}
                         data={item}
-                        productUrl={buildUrl(productPrefix, item.slug)}
+                        productUrl={buildUrl(productPrefix, item.slug || item._id)}
                         currencySymbol={currencySymbol}
                         permalinkMap={permalinkMap}
                     />

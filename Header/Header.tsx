@@ -18,7 +18,7 @@
 import React, { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import MobileDrawer from '@/components/page/header/MobileDrawer';
 import SearchGadgets from './SearchGadgets';
@@ -38,7 +38,7 @@ interface HeaderGadgetsProps {
   builderContent?: Record<string, any[]>;
 }
 
-function checkIsActive(itemUrl: string, pathname: string, searchParams: URLSearchParams): boolean {
+function checkIsActive(itemUrl: string, pathname: string, searchParams?: URLSearchParams | null): boolean {
   if (!itemUrl || itemUrl === '#') return false;
   try {
     const parsed = new URL(itemUrl, 'http://localhost');
@@ -46,12 +46,13 @@ function checkIsActive(itemUrl: string, pathname: string, searchParams: URLSearc
     const currentPath = (pathname.replace(/\/$/, '') || '/').toLowerCase();
     if (itemPath !== currentPath) return false;
 
+    const sp = searchParams ?? (typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams());
     const itemKeys = Array.from(parsed.searchParams.keys());
     if (itemKeys.length === 0) {
-      return !searchParams.get('category') && !searchParams.get('q');
+      return !sp.get('category') && !sp.get('q');
     }
     for (const key of itemKeys) {
-      if ((parsed.searchParams.get(key) || '').toLowerCase() !== (searchParams.get(key) || '').toLowerCase()) {
+      if ((parsed.searchParams.get(key) || '').toLowerCase() !== (sp.get(key) || '').toLowerCase()) {
         return false;
       }
     }
@@ -69,7 +70,6 @@ function HeaderGadgetsInner({
   const { settings: hookSettings } = useSettings();
   const settings = propSettings && Object.keys(propSettings).length > 0 ? propSettings : hookSettings;
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [scrolled, setScrolled] = useState(false);
   const [hoveredMenuId, setHoveredMenuId] = useState<string | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -203,7 +203,7 @@ function HeaderGadgetsInner({
             {items.map((item) => {
               const hasChildren = item.children && item.children.length > 0;
               const isHovered = hoveredMenuId === item.id;
-              const isRouteActive = checkIsActive(item.url, pathname, searchParams);
+              const isRouteActive = checkIsActive(item.url, pathname);
               const isSelected = isHovered || isRouteActive;
 
               return (
@@ -377,9 +377,5 @@ function MegaMenuColumns({
 }
 
 export default function HeaderGadgets(props: HeaderGadgetsProps) {
-  return (
-    <Suspense fallback={null}>
-      <HeaderGadgetsInner {...props} />
-    </Suspense>
-  );
+  return <HeaderGadgetsInner {...props} />;
 }

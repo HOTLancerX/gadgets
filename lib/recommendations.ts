@@ -434,8 +434,42 @@ export async function getSmartCategoryCompareProducts(
             siblings.forEach((s) => relatedCatIds.add(String(s._id)));
         }
 
-        // Find posts with non-empty specifications
+        // First find candidate posts in related categories (limit to 20 for fast response)
+        const query: any = {
+            type: "product",
+            status: "published",
+        };
+        if (productId && mongoose.Types.ObjectId.isValid(productId)) {
+            query._id = { $ne: new mongoose.Types.ObjectId(productId) };
+        }
+        if (relatedCatIds.size > 0) {
+            query.category = {
+                $in: Array.from(relatedCatIds).map((id) => new mongoose.Types.ObjectId(id)),
+            };
+        }
+
+        let candidatePosts = (await Post.find(query).limit(20).lean()) as any[];
+
+        // Fallback: If no candidate found in exact related categories, search across recent published products
+        if (candidatePosts.length === 0) {
+            candidatePosts = (await Post.find({
+                type: "product",
+                status: "published",
+                ...(productId && mongoose.Types.ObjectId.isValid(productId)
+                    ? { _id: { $ne: new mongoose.Types.ObjectId(productId) } }
+                    : {}),
+            }).limit(20).lean()) as any[];
+        }
+
+        if (candidatePosts.length === 0) {
+            return { compareProducts: [], allCompareCandidates: [] };
+        }
+
+        const candidateIds = candidatePosts.map((p) => p._id);
+
+        // Fetch specifications ONLY for the candidate posts — avoids full table scan on 80,000+ PostInfos
         const specInfos = (await PostInfo.find({
+            postId: { $in: candidateIds },
             name: "_specifications",
         }).lean()) as any[];
 
@@ -464,46 +498,18 @@ export async function getSmartCategoryCompareProducts(
             }
         }
 
-        const validSpecIdsFiltered = validSpecPostIds.filter(
-            (id) => String(id) !== String(productId)
-        );
-
-        if (validSpecIdsFiltered.length === 0) {
-            return { compareProducts: [], allCompareCandidates: [] };
-        }
-
-        const query: any = {
-            _id: { $in: validSpecIdsFiltered },
-            type: "product",
-            status: "published",
-        };
-
-        if (relatedCatIds.size > 0) {
-            query.category = {
-                $in: Array.from(relatedCatIds).map((id) => new mongoose.Types.ObjectId(id)),
-            };
-        }
-
-        let candidatePosts = (await Post.find(query).lean()) as any[];
-
-        // Fallback: If no candidate found in exact related categories, search across all published products with specs
-        if (candidatePosts.length === 0) {
-            candidatePosts = (await Post.find({
-                _id: { $in: validSpecIdsFiltered },
-                type: "product",
-                status: "published",
-            }).lean()) as any[];
-        }
+        const validPostIdStrings = new Set(validSpecPostIds.map((id) => String(id)));
+        candidatePosts = candidatePosts.filter((p) => validPostIdStrings.has(String(p._id)));
 
         if (candidatePosts.length === 0) {
             return { compareProducts: [], allCompareCandidates: [] };
         }
 
-        const candidateIds = candidatePosts.map((p) => p._id);
+        const postIds = candidatePosts.map((p) => p._id);
 
         // Batch fetch postinfos for images and variates
         const infoDocs = (await PostInfo.find({
-            postId: { $in: candidateIds },
+            postId: { $in: postIds },
         }).lean()) as any[];
 
         const infoByPost: Record<string, Record<string, string>> = {};
