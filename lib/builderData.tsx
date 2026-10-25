@@ -139,11 +139,9 @@ async function fetchCategoryDataRaw(tabs: CategoryTabConfig[], limitCount: numbe
 
         if (catId && catId !== 'all') {
           if (Types.ObjectId.isValid(catId)) {
-            query.category = new Types.ObjectId(catId);
+            query.category = { $in: [new Types.ObjectId(catId), catId] };
           } else {
-            productsByCategory[catId] = [];
-            productsByCategory[tab.id] = [];
-            return;
+            query.category = catId;
           }
         }
 

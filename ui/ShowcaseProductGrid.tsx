@@ -220,18 +220,36 @@ export default function ShowcaseProductGrid({
     return DEFAULT_SHOWCASE_PRODUCTS;
   });
 
-  const [loading, setLoading] = useState(false);
   const inFlightRef = useRef(false);
+  const hasMountedRef = useRef(false);
+  const prevCategoryRef = useRef(categoryId);
+  const prevLimitRef = useRef(limit);
 
-  // Sync client-side when categoryId or limit changes in builder canvas
+  // Sync client-side ONLY when categoryId or limit changes inside builder editor canvas
   useEffect(() => {
-    if (initialProducts && initialProducts.length > 0 && categoryId === 'all') {
+    // If we already have initialProducts from SSR, do NOT fetch on mount
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      if (Array.isArray(initialProducts) && initialProducts.length > 0) {
+        return;
+      }
+    }
+
+    // If categoryId and limit haven't changed from what was initially rendered, do nothing
+    if (
+      prevCategoryRef.current === categoryId &&
+      prevLimitRef.current === limit &&
+      Array.isArray(initialProducts) &&
+      initialProducts.length > 0
+    ) {
       return;
     }
 
+    prevCategoryRef.current = categoryId;
+    prevLimitRef.current = limit;
+
     if (inFlightRef.current) return;
     inFlightRef.current = true;
-    setLoading(true);
 
     const safeLimit = Math.min(Number(limit) || 7, 30);
     const params = new URLSearchParams({
@@ -285,7 +303,6 @@ export default function ShowcaseProductGrid({
           });
       })
       .finally(() => {
-        setLoading(false);
         inFlightRef.current = false;
       });
   }, [categoryId, limit, permalinkPrefix]);
@@ -557,13 +574,6 @@ export default function ShowcaseProductGrid({
           </div>
         )}
 
-        {/* ── Loading Spinner Overlay during client updates ── */}
-        {loading && (
-          <div className="flex items-center justify-center py-6 text-gray-400 gap-2 text-xs">
-            <Icon icon="svg-spinners:ring-resize" width={20} className="animate-spin text-blue-600" />
-            <span>Updating showcase products...</span>
-          </div>
-        )}
 
         {/* ── TOP SHOWCASE SECTION ── */}
         {gridStyle === 'featured-left' && topItems.length > 0 && (
