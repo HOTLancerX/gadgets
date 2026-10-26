@@ -16,14 +16,16 @@
  *  - Fixed bottom bar on mobile screens.
  */
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
+import useEmblaCarousel from "embla-carousel-react";
 import { useToast } from "@/components/ui/Toast";
 import Variant from "@/plugin/product/product/Variant";
 import GadgetsSpecification, { type SpecBox } from "./Specification";
+import { isValidSpecValue } from "./specUtils";
 import GadgetsCompare, { type CompareProductItem } from "./Compare";
 import GadgetsFrequencyTogether, { type SetupProductItem } from "./FrequencyTogether";
 import GadgetsReviews, { type ReviewsData } from "./Reviews";
@@ -159,6 +161,317 @@ function buildAttributes(variants: any[], selectedAttributes: any[]) {
         label,
         values: Array.from(values),
     }));
+}
+
+// ── Product Image Showcase with Embla Carousel ──────────────────────────────
+interface ProductImageShowcaseProps {
+    images: string[];
+    title: string;
+    isDiscounted?: boolean;
+    discountPercent?: number;
+    warranty?: string;
+    selectedIndex: number;
+    onSelectIndex: (index: number) => void;
+}
+
+function ProductImageShowcase({
+    images = [],
+    title,
+    isDiscounted,
+    discountPercent = 0,
+    warranty,
+    selectedIndex,
+    onSelectIndex,
+}: ProductImageShowcaseProps) {
+    const gallery = images.length > 0 ? images : [];
+    const hasMultiple = gallery.length > 1;
+
+    // Embla Carousel for Main Image showcase (handles touch swiping and drag)
+    const [emblaMainRef, emblaMainApi] = useEmblaCarousel({
+        loop: hasMultiple,
+        duration: 25,
+        skipSnaps: false,
+    });
+
+    const thumbsContainerRef = useRef<HTMLDivElement>(null);
+    const thumbItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+    const mainFrameRef = useRef<HTMLDivElement>(null);
+
+    const [mainHeight, setMainHeight] = useState<number | undefined>(undefined);
+    const [hasVerticalOverflow, setHasVerticalOverflow] = useState(false);
+    const [canScrollUp, setCanScrollUp] = useState(false);
+    const [canScrollDown, setCanScrollDown] = useState(false);
+
+    // Sync Embla slide change with selectedIndex
+    const onSelect = useCallback(() => {
+        if (!emblaMainApi) return;
+        const snap = emblaMainApi.selectedScrollSnap();
+        if (snap !== selectedIndex) {
+            onSelectIndex(snap);
+        }
+    }, [emblaMainApi, selectedIndex, onSelectIndex]);
+
+    useEffect(() => {
+        if (!emblaMainApi) return;
+        emblaMainApi.on("select", onSelect);
+        emblaMainApi.on("reInit", onSelect);
+        return () => {
+            emblaMainApi.off("select", onSelect);
+            emblaMainApi.off("reInit", onSelect);
+        };
+    }, [emblaMainApi, onSelect]);
+
+    // External change to selectedIndex (e.g. variant switched or thumbnail clicked)
+    useEffect(() => {
+        if (!emblaMainApi) return;
+        if (emblaMainApi.selectedScrollSnap() !== selectedIndex) {
+            emblaMainApi.scrollTo(selectedIndex);
+        }
+    }, [selectedIndex, emblaMainApi]);
+
+    // ReInit Embla when images change (e.g. variant change)
+    useEffect(() => {
+        if (emblaMainApi) {
+            emblaMainApi.reInit();
+            if (selectedIndex !== 0) {
+                emblaMainApi.scrollTo(selectedIndex);
+            }
+        }
+    }, [gallery, emblaMainApi]);
+
+    // Keep active thumbnail scrolled into view
+    useEffect(() => {
+        const activeEl = thumbItemRefs.current[selectedIndex];
+        if (activeEl) {
+            activeEl.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+                inline: "center",
+            });
+        }
+    }, [selectedIndex]);
+
+    // Track Main Image height on desktop to match thumbnail column height precisely
+    useEffect(() => {
+        const el = mainFrameRef.current;
+        if (!el) return;
+
+        const updateHeight = () => {
+            if (window.innerWidth >= 768) {
+                setMainHeight(el.offsetHeight);
+            } else {
+                setMainHeight(undefined);
+            }
+        };
+
+        updateHeight();
+        const ro = new ResizeObserver(updateHeight);
+        ro.observe(el);
+        window.addEventListener("resize", updateHeight);
+
+        return () => {
+            ro.disconnect();
+            window.removeEventListener("resize", updateHeight);
+        };
+    }, []);
+
+    // Check if thumbnails overflow vertically on desktop
+    const checkOverflow = useCallback(() => {
+        const el = thumbsContainerRef.current;
+        if (!el) return;
+
+        const isOverflowing = el.scrollHeight > el.clientHeight + 4;
+        setHasVerticalOverflow(isOverflowing);
+        setCanScrollUp(el.scrollTop > 5);
+        setCanScrollDown(el.scrollTop + el.clientHeight < el.scrollHeight - 5);
+    }, []);
+
+    useEffect(() => {
+        checkOverflow();
+        const el = thumbsContainerRef.current;
+        if (!el) return;
+
+        el.addEventListener("scroll", checkOverflow, { passive: true });
+        const ro = new ResizeObserver(() => checkOverflow());
+        ro.observe(el);
+
+        return () => {
+            el.removeEventListener("scroll", checkOverflow);
+            ro.disconnect();
+        };
+    }, [checkOverflow, gallery, mainHeight]);
+
+    // Vertical thumbnail scroll buttons
+    const handleScrollThumbs = (direction: "up" | "down") => {
+        const el = thumbsContainerRef.current;
+        if (!el) return;
+        const scrollAmount = 88;
+        el.scrollBy({
+            top: direction === "up" ? -scrollAmount : scrollAmount,
+            behavior: "smooth",
+        });
+    };
+
+    const handleThumbClick = (index: number) => {
+        onSelectIndex(index);
+        if (emblaMainApi) {
+            emblaMainApi.scrollTo(index);
+        }
+    };
+
+    return (
+        <div className="flex flex-col-reverse md:flex-row gap-3 md:gap-4.5 items-stretch">
+            {/* ── Left Column (Desktop) / Bottom Strip (Mobile): Thumbnails ── */}
+            {hasMultiple && (
+                <div
+                    className="w-full md:w-30 shrink-0 flex flex-col justify-between select-none relative"
+                    style={{
+                        height: mainHeight ? `${mainHeight}px` : undefined,
+                        maxHeight: mainHeight ? `${mainHeight}px` : undefined,
+                    }}
+                >
+                    {/* Top (Up) Button - shown only when thumbnails overflow on desktop */}
+                    {hasVerticalOverflow && (
+                        <button
+                            type="button"
+                            onClick={() => handleScrollThumbs("up")}
+                            disabled={!canScrollUp}
+                            className="hidden md:flex items-center justify-center w-full py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed mb-1.5 shadow-2xs shrink-0"
+                            aria-label="Previous thumbnails"
+                            title="Scroll up"
+                        >
+                            <Icon icon="solar:alt-arrow-up-linear" width={16} />
+                        </button>
+                    )}
+
+                    {/* Scrollable Thumbnails List (Horizontal on Mobile, Vertical on Desktop) */}
+                    <div
+                        ref={thumbsContainerRef}
+                        className="w-full flex-1 overflow-x-auto md:overflow-y-auto scrollbar-none scroll-smooth flex flex-row md:flex-col gap-2.5 p-0.5"
+                    >
+                        {gallery.map((img, i) => {
+                            const isSelected = selectedIndex === i;
+                            return (
+                                <button
+                                    key={i}
+                                    ref={(el) => {
+                                        thumbItemRefs.current[i] = el;
+                                    }}
+                                    type="button"
+                                    onClick={() => handleThumbClick(i)}
+                                    className={`relative w-20 h-20 md:w-full md:aspect-square rounded-xl md:rounded-2xl border-2 p-1.5 bg-white shrink-0 transition-all duration-200 cursor-pointer overflow-hidden flex items-center justify-center ${
+                                        isSelected
+                                            ? "border-blue-600 ring-2 ring-blue-100 shadow-xs scale-102 opacity-100"
+                                            : "border-gray-200/90 hover:border-gray-300 opacity-65 hover:opacity-100 hover:scale-101"
+                                    }`}
+                                    aria-label={`View image ${i + 1}`}
+                                >
+                                    <img
+                                        src={img}
+                                        alt={`${title} thumbnail ${i + 1}`}
+                                        className="w-full h-full object-contain pointer-events-none mix-blend-multiply brightness-105"
+                                    />
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Bottom (Down) Button - shown only when thumbnails overflow on desktop */}
+                    {hasVerticalOverflow && (
+                        <button
+                            type="button"
+                            onClick={() => handleScrollThumbs("down")}
+                            disabled={!canScrollDown}
+                            className="hidden md:flex items-center justify-center w-full py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed mt-1.5 shadow-2xs shrink-0"
+                            aria-label="Next thumbnails"
+                            title="Scroll down"
+                        >
+                            <Icon icon="solar:alt-arrow-down-linear" width={16} />
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* ── Right Column: Main Showcase with Embla Carousel ── */}
+            <div className="flex-1 min-w-0">
+                <div
+                    ref={mainFrameRef}
+                    className="relative aspect-square w-full overflow-hidden flex items-center justify-center group"
+                >
+                    {/* Badges Overlay */}
+                    <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5 items-start pointer-events-none">
+                        {isDiscounted && discountPercent > 0 && (
+                            <span className="px-2.5 py-1 rounded-full bg-red-600 text-white font-extrabold text-[11px] shadow-xs tracking-wider uppercase">
+                                SALE -{discountPercent}%
+                            </span>
+                        )}
+                        {warranty && (
+                            <span className="px-2.5 py-1 rounded-full bg-blue-600 text-white font-bold text-[10px] shadow-xs flex items-center gap-1">
+                                <Icon icon="solar:shield-check-bold" width={12} />
+                                {warranty}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Counter Pill */}
+                    {hasMultiple && (
+                        <div className="absolute top-4 right-4 z-10 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white font-semibold text-[11px] shadow-xs tracking-wide pointer-events-none">
+                            {selectedIndex + 1} / {gallery.length}
+                        </div>
+                    )}
+
+                    {/* Main Embla Carousel Viewport */}
+                    <div
+                        ref={emblaMainRef}
+                        className="overflow-hidden w-full h-full select-none cursor-grab active:cursor-grabbing"
+                    >
+                        <div className="flex h-full touch-pan-y">
+                            {gallery.length > 0 ? (
+                                gallery.map((img, i) => (
+                                    <div
+                                        key={i}
+                                        className="flex-[0_0_100%] min-w-0 h-full relative flex items-center justify-center p-6 md:p-8"
+                                    >
+                                        <img
+                                            src={img}
+                                            alt={`${title} - view ${i + 1}`}
+                                            className="w-full h-full object-contain pointer-events-none transition-transform duration-500 group-hover:scale-105 mix-blend-multiply brightness-105"
+                                        />
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center">
+                                    <Icon icon="solar:devices-linear" width={64} className="text-gray-300" />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Desktop Hover Nav Arrows */}
+                    {hasMultiple && (
+                        <>
+                            <button
+                                type="button"
+                                onClick={() => emblaMainApi?.scrollPrev()}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md border border-gray-200/80 hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer hover:scale-105 active:scale-95"
+                                aria-label="Previous slide"
+                            >
+                                <Icon icon="solar:alt-arrow-left-linear" width={18} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => emblaMainApi?.scrollNext()}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md border border-gray-200/80 hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer hover:scale-105 active:scale-95"
+                                aria-label="Next slide"
+                            >
+                                <Icon icon="solar:alt-arrow-right-linear" width={18} />
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
 }
 
 export default function GadgetsProductDetails(props: GadgetsProductDetailsProps) {
@@ -349,14 +662,14 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
         router.push("/checkout");
     };
 
-    // Valid specifications filtering (omit boxes with no info)
+    // Valid specifications filtering (omit boxes with no info or 'Not specified')
     const validSpecifications: SpecBox[] = useMemo(() => {
         if (!Array.isArray(specifications)) return [];
         return specifications
             .map((box) => ({
                 ...box,
                 fields: (box.fields || []).filter(
-                    (f) => typeof f?.description === "string" && f.description.trim().length > 0
+                    (f) => typeof f?.title === "string" && f.title.trim().length > 0 && isValidSpecValue(f?.description)
                 ),
             }))
             .filter((box) => box.fields.length > 0);
@@ -405,7 +718,7 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
             .map((box) => ({
                 ...box,
                 fields: (box.fields || []).filter(
-                    (f: any) => typeof f?.description === "string" && f.description.trim().length > 0
+                    (f: any) => typeof f?.title === "string" && f.title.trim().length > 0 && isValidSpecValue(f?.description)
                 ),
             }))
             .filter((box) => box.fields.length > 0);
@@ -456,57 +769,18 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
     if (props.heroOnly) {
         return (
             <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-3xl border border-gray-200/80 p-5 md:p-8 shadow-xs">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-white rounded-3xl border border-gray-200/80 p-5 md:p-8 shadow-xs">
                     {/* Left Column: Image Showcase (5 Cols) */}
-                    <div className="space-y-4">
-                        {/* Main Image Frame */}
-                        <div className="relative aspect-square w-full rounded-2xl bg-gray-50/70 border border-gray-200/80 p-6 overflow-hidden flex items-center justify-center group shadow-2xs">
-                            {/* Badges Overlay */}
-                            <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5 items-start">
-                                {isDiscounted && currentDiscountPercent > 0 && (
-                                    <span className="px-2.5 py-1 rounded-full bg-red-600 text-white font-extrabold text-[11px] shadow-xs tracking-wider uppercase">
-                                        SALE -{currentDiscountPercent}%
-                                    </span>
-                                )}
-                                {warranty && (
-                                    <span className="px-2.5 py-1 rounded-full bg-blue-600 text-white font-bold text-[10px] shadow-xs flex items-center gap-1">
-                                        <Icon icon="solar:shield-check-bold" width={12} />
-                                        {warranty}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* Main Active Image with Zoom */}
-                            {activeImage ? (
-                                <img
-                                    src={activeImage}
-                                    alt={data.title}
-                                    className="w-full h-full object-contain group-hover:scale-108 transition-transform duration-500"
-                                />
-                            ) : (
-                                <Icon icon="solar:devices-linear" width={64} className="text-gray-300" />
-                            )}
-                        </div>
-
-                        {/* Thumbnail Strip */}
-                        {currentGallery.length > 1 && (
-                            <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
-                                {currentGallery.map((img, i) => (
-                                    <button
-                                        key={i}
-                                        type="button"
-                                        onClick={() => setSelectedImageIndex(i)}
-                                        className={`w-16 h-16 rounded-xl border-2 p-1 bg-white shrink-0 transition-all cursor-pointer overflow-hidden ${
-                                            selectedImageIndex === i
-                                                ? "border-blue-600 ring-2 ring-blue-100 shadow-2xs scale-102"
-                                                : "border-gray-200 hover:border-gray-300 opacity-70 hover:opacity-100"
-                                        }`}
-                                    >
-                                        <img src={img} alt={`Angle ${i + 1}`} className="w-full h-full object-contain" />
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                    <div className="md:col-span-2">
+                        <ProductImageShowcase
+                            images={currentGallery}
+                            title={data.title}
+                            isDiscounted={isDiscounted}
+                            discountPercent={currentDiscountPercent}
+                            warranty={warranty}
+                            selectedIndex={selectedImageIndex}
+                            onSelectIndex={setSelectedImageIndex}
+                        />
                     </div>
 
                     {/* Right Column: Key Details & Purchasing (7 Cols) */}
@@ -700,54 +974,52 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
 
                         {/* Trust / Guarantee Badges (Screenshot design) */}
                         <div className="pt-6 border-t border-gray-100">
-                            <div className="rounded-2xl border border-gray-200/80 bg-white p-3 md:p-4 shadow-2xs">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-3">
-                                    {/* 1. Dynamic Warranty / Genuine */}
-                                    <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 md:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
-                                        <Icon icon="solar:shield-check-linear" width={26} className="text-emerald-600 mb-2 shrink-0" />
-                                        <span className="text-xs font-black tracking-wider text-slate-900 uppercase">
-                                            {warranty ? "WARRANTY" : "GENUINE"}
-                                        </span>
-                                        <span
-                                            className="text-[11px] md:text-xs text-slate-500 font-medium mt-0.5 truncate max-w-full"
-                                            title={warranty || "100% Original"}
-                                        >
-                                            {warranty || "100% Original"}
-                                        </span>
-                                    </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                {/* 1. Dynamic Warranty / Genuine */}
+                                <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 md:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
+                                    <Icon icon="solar:shield-check-linear" width={26} className="text-emerald-600 mb-2 shrink-0" />
+                                    <span className="text-xs font-black tracking-wider text-slate-900 uppercase">
+                                        {warranty ? "WARRANTY" : "GENUINE"}
+                                    </span>
+                                    <span
+                                        className="text-[11px] md:text-xs text-slate-500 font-medium mt-0.5 truncate max-w-full"
+                                        title={warranty || "100% Original"}
+                                    >
+                                        {warranty || "100% Original"}
+                                    </span>
+                                </div>
 
-                                    {/* 2. M-PESA Secure Pay */}
-                                    <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 md:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
-                                        <Icon icon="solar:smartphone-linear" width={26} className="text-emerald-600 mb-2 shrink-0" />
-                                        <span className="text-xs font-black tracking-wider text-slate-900 uppercase">
-                                            M-PESA
-                                        </span>
-                                        <span className="text-[11px] md:text-xs text-slate-500 font-medium mt-0.5">
-                                            Secure Pay
-                                        </span>
-                                    </div>
+                                {/* 2. M-PESA Secure Pay */}
+                                <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 md:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
+                                    <Icon icon="solar:smartphone-linear" width={26} className="text-emerald-600 mb-2 shrink-0" />
+                                    <span className="text-xs font-black tracking-wider text-slate-900 uppercase">
+                                        M-PESA
+                                    </span>
+                                    <span className="text-[11px] md:text-xs text-slate-500 font-medium mt-0.5">
+                                        Secure Pay
+                                    </span>
+                                </div>
 
-                                    {/* 3. Fast Delivery */}
-                                    <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 md:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
-                                        <Icon icon="solar:delivery-linear" width={26} className="text-emerald-600 mb-2 shrink-0" />
-                                        <span className="text-xs font-black tracking-wider text-slate-900 uppercase">
-                                            DELIVERY
-                                        </span>
-                                        <span className="text-[11px] md:text-xs text-slate-500 font-medium mt-0.5">
-                                            Fast Dispatch
-                                        </span>
-                                    </div>
+                                {/* 3. Fast Delivery */}
+                                <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 md:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
+                                    <Icon icon="solar:delivery-linear" width={26} className="text-emerald-600 mb-2 shrink-0" />
+                                    <span className="text-xs font-black tracking-wider text-slate-900 uppercase">
+                                        DELIVERY
+                                    </span>
+                                    <span className="text-[11px] md:text-xs text-slate-500 font-medium mt-0.5">
+                                        Fast Dispatch
+                                    </span>
+                                </div>
 
-                                    {/* 4. Expert Support */}
-                                    <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 md:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
-                                        <Icon icon="solar:headphones-round-linear" width={26} className="text-emerald-600 mb-2 shrink-0" />
-                                        <span className="text-xs font-black tracking-wider text-slate-900 uppercase">
-                                            SUPPORT
-                                        </span>
-                                        <span className="text-[11px] md:text-xs text-slate-500 font-medium mt-0.5">
-                                            Expert Help
-                                        </span>
-                                    </div>
+                                {/* 4. Expert Support */}
+                                <div className="rounded-xl border border-gray-200/80 bg-gray-50 p-3.5 md:p-4 flex flex-col items-center justify-center text-center transition-all hover:border-gray-300">
+                                    <Icon icon="solar:headphones-round-linear" width={26} className="text-emerald-600 mb-2 shrink-0" />
+                                    <span className="text-xs font-black tracking-wider text-slate-900 uppercase">
+                                        SUPPORT
+                                    </span>
+                                    <span className="text-[11px] md:text-xs text-slate-500 font-medium mt-0.5">
+                                        Expert Help
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -814,55 +1086,16 @@ export default function GadgetsProductDetails(props: GadgetsProductDetailsProps)
                 {/* ─── 1. TOP HERO: GALLERY + DETAILS ─── */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-3xl border border-gray-200/80 p-5 md:p-8 shadow-xs">
                     {/* Left Column: Image Showcase (5 Cols) */}
-                    <div className="space-y-4">
-                        {/* Main Image Frame */}
-                        <div className="relative aspect-square w-full rounded-2xl bg-gray-50/70 border border-gray-200/80 p-6 overflow-hidden flex items-center justify-center group shadow-2xs">
-                            {/* Badges Overlay */}
-                            <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5 items-start">
-                                {isDiscounted && currentDiscountPercent > 0 && (
-                                    <span className="px-2.5 py-1 rounded-full bg-red-600 text-white font-extrabold text-[11px] shadow-xs tracking-wider uppercase">
-                                        SALE -{currentDiscountPercent}%
-                                    </span>
-                                )}
-                                {warranty && (
-                                    <span className="px-2.5 py-1 rounded-full bg-blue-600 text-white font-bold text-[10px] shadow-xs flex items-center gap-1">
-                                        <Icon icon="solar:shield-check-bold" width={12} />
-                                        {warranty}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* Main Active Image with Zoom */}
-                            {activeImage ? (
-                                <img
-                                    src={activeImage}
-                                    alt={data.title}
-                                    className="w-full h-full object-contain group-hover:scale-108 transition-transform duration-500"
-                                />
-                            ) : (
-                                <Icon icon="solar:devices-linear" width={64} className="text-gray-300" />
-                            )}
-                        </div>
-
-                        {/* Thumbnail Strip */}
-                        {currentGallery.length > 1 && (
-                            <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
-                                {currentGallery.map((img, i) => (
-                                    <button
-                                        key={i}
-                                        type="button"
-                                        onClick={() => setSelectedImageIndex(i)}
-                                        className={`w-16 h-16 rounded-xl border-2 p-1 bg-white shrink-0 transition-all cursor-pointer overflow-hidden ${
-                                            selectedImageIndex === i
-                                                ? "border-blue-600 ring-2 ring-blue-100 shadow-2xs scale-102"
-                                                : "border-gray-200 hover:border-gray-300 opacity-70 hover:opacity-100"
-                                        }`}
-                                    >
-                                        <img src={img} alt={`Angle ${i + 1}`} className="w-full h-full object-contain" />
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                    <div>
+                        <ProductImageShowcase
+                            images={currentGallery}
+                            title={data.title}
+                            isDiscounted={isDiscounted}
+                            discountPercent={currentDiscountPercent}
+                            warranty={warranty}
+                            selectedIndex={selectedImageIndex}
+                            onSelectIndex={setSelectedImageIndex}
+                        />
                     </div>
 
                     {/* Right Column: Key Details & Purchasing (7 Cols) */}

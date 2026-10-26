@@ -50,10 +50,10 @@ export default function GadgetsVideos({ videos = [], productTitle }: GadgetsVide
     return (
         <section
             id="product-videos"
-            className="bg-white rounded-3xl border border-gray-200/80 p-5 md:p-8 shadow-xs space-y-6"
+            className="bg-white rounded-3xl border border-gray-200/80 p-2 md:p-4 shadow-xs space-y-6"
         >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 pb-4 gap-3 flex-wrap">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-2 gap-3 flex-wrap">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-2xs">
                         <Icon icon="logos:youtube-icon" width={22} />
@@ -106,22 +106,16 @@ export default function GadgetsVideos({ videos = [], productTitle }: GadgetsVide
 
                                 {/* Centered Play Button */}
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-red-600/90 hover:bg-red-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                    <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-red-500/50 group-hover:bg-red-500 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                                         <Icon icon="solar:play-bold" width={18} className="ml-0.5" />
                                     </div>
-                                </div>
-
-                                {/* Video Index Pill */}
-                                <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-xs text-[10px] font-bold text-white flex items-center gap-1">
-                                    <Icon icon="solar:videocamera-record-bold" width={10} className="text-red-400" />
-                                    <span>Video {idx + 1}</span>
                                 </div>
                             </div>
 
                             {/* Title Underneath Thumbnail */}
-                            <div className="pt-2 px-0.5">
+                            <div className="pt-2 px-0.5 text-center">
                                 <p
-                                    className="text-xs md:text-sm font-bold text-gray-800 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors"
+                                    className="text-xs md:text-sm font-bold text-gray-800 line-clamp-2 leading-snug group-hover:text-red-500 transition-colors"
                                     title={vid.title}
                                 >
                                     {vid.title || `Product Video ${idx + 1}`}

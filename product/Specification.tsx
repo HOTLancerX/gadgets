@@ -12,6 +12,8 @@
 
 import React, { useState, useMemo } from "react";
 import { Icon } from "@iconify/react";
+import { isValidSpecValue } from "./specUtils";
+export { isValidSpecValue } from "./specUtils";
 
 export interface SpecField {
     title: string;
@@ -49,16 +51,17 @@ function getBoxIcon(title: string, icon?: string): string {
     return "solar:widget-2-linear";
 }
 
+
 export default function GadgetsSpecification({ specifications = [], productTitle }: SpecificationProps) {
     const [searchQuery, setSearchQuery] = useState("");
 
-    // 1. Clean specs: strictly keep only fields with non-empty info, and boxes with at least 1 field
+    // 1. Clean specs: strictly keep only fields with non-empty, informative info (excluding 'Not specified'), and boxes with at least 1 field
     const cleanedSpecifications = useMemo(() => {
         if (!Array.isArray(specifications)) return [];
         return specifications
             .map((box) => {
                 const validFields = (box.fields || []).filter(
-                    (f) => typeof f?.description === "string" && f.description.trim().length > 0
+                    (f) => typeof f?.title === "string" && f.title.trim().length > 0 && isValidSpecValue(f?.description)
                 );
                 if (validFields.length === 0) return null;
                 return {

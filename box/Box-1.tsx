@@ -89,7 +89,7 @@ export default function GadgetsBox1({
     productUrl,
     currencySymbol = 'KSh',
     permalinkMap = {},
-    imageHeightDesktop = 210,
+    imageHeightDesktop = 250,
     imageHeightMobile = 170,
 }: GadgetsBox1Props) {
     const slug = data?.slug || String(data?._id || '');

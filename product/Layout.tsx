@@ -24,12 +24,11 @@ import { Icon } from "@iconify/react";
 import GadgetsProductDetails from "./Details";
 import GadgetsDescription from "./Description";
 import GadgetsSpecification, { type SpecBox } from "./Specification";
-import GadgetsCompare, { type CompareProductItem } from "./Compare";
-import GadgetsFrequencyTogether, { type SetupProductItem } from "./FrequencyTogether";
+import { isValidSpecValue } from "./specUtils";
+import { type CompareProductItem } from "./Compare";
 import GadgetsReviews, { type ReviewsData } from "./Reviews";
 import GadgetsVideos, { type VideoItem } from "./Videos";
 import GadgetsRelated from "./Related";
-import GadgetsVisualDescription from "./VisualDescription";
 import LazyCompare from "./LazyCompare";
 import LazyFrequencyTogether from "./LazyFrequencyTogether";
 import LazyVisualDescription from "./LazyVisualDescription";
@@ -121,7 +120,7 @@ function mapToCompareItem(p: any, productPrefix: string): CompareProductItem | n
         .map((box) => ({
             ...box,
             fields: (box.fields || []).filter(
-                (f: any) => typeof f?.description === "string" && f.description.trim().length > 0
+                (f: any) => typeof f?.title === "string" && f.title.trim().length > 0 && isValidSpecValue(f?.description)
             ),
         }))
         .filter((box) => box.fields.length > 0);
@@ -173,7 +172,7 @@ export default function GadgetsProductLayout({
         .map((box) => ({
             ...box,
             fields: (box.fields || []).filter(
-                (f) => typeof f?.description === "string" && f.description.trim().length > 0
+                (f) => typeof f?.title === "string" && f.title.trim().length > 0 && isValidSpecValue(f?.description)
             ),
         }))
         .filter((box) => box.fields && box.fields.length > 0);
@@ -458,6 +457,24 @@ export default function GadgetsProductLayout({
                     <GadgetsDescription html={htmlDescription || description} />
                 )}
 
+                {/* ─── 7. COMPLETE YOUR SETUP (PROGRESSIVE LOAD WITH SKELETON) ─── */}
+                <LazyFrequencyTogether
+                    productId={String(data._id)}
+                    productTitle={data.title}
+                    categoryId={data.category ?? null}
+                    categoryTitle={ancestors.length > 0 ? ancestors[ancestors.length - 1]?.title : undefined}
+                    brandTitle={brand?.title}
+                    currencySymbol={currencySymbol}
+                    initialProducts={frequentlyTogether}
+                />
+            </div>
+
+            {/* ─── 6. VISUAL DESCRIPTION (PROGRESSIVE LOAD WITH SKELETON) ─── */}
+            {hasVisualDescription && (
+                <LazyVisualDescription data={visualDescription} productTitle={data.title} />
+            )}
+
+            <div className="container py-6 space-y-8">
                 {/* ─── 5. AUTOMATIC COMPARE COMPONENT (PROGRESSIVE LOAD WITH SKELETON) ─── */}
                 <LazyCompare
                     productId={String(data._id)}
@@ -470,24 +487,6 @@ export default function GadgetsProductLayout({
                     initialCompareProducts={parsedCompareCandidates}
                     initialAllCandidates={allCategoryCompareCandidates}
                     productPrefix={productPrefix}
-                />
-            </div>
-
-            {/* ─── 6. VISUAL DESCRIPTION (PROGRESSIVE LOAD WITH SKELETON) ─── */}
-            {hasVisualDescription && (
-                <LazyVisualDescription data={visualDescription} productTitle={data.title} />
-            )}
-
-            <div className="container py-6 space-y-8">
-                {/* ─── 7. COMPLETE YOUR SETUP (PROGRESSIVE LOAD WITH SKELETON) ─── */}
-                <LazyFrequencyTogether
-                    productId={String(data._id)}
-                    productTitle={data.title}
-                    categoryId={data.category ?? null}
-                    categoryTitle={ancestors.length > 0 ? ancestors[ancestors.length - 1]?.title : undefined}
-                    brandTitle={brand?.title}
-                    currencySymbol={currencySymbol}
-                    initialProducts={frequentlyTogether}
                 />
 
                 {/* ─── 8. SPECIFICATIONS COMPONENT (SSR) ─── */}

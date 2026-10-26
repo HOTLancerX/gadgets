@@ -16,6 +16,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
 import type { SpecBox } from "./Specification";
+import { isValidSpecValue } from "./specUtils";
 
 export interface CompareProductItem {
     id: string;
@@ -93,7 +94,7 @@ export default function GadgetsCompare({
                 !activeComparedProducts.some((a) => String(a.id) === String(p.id)) &&
                 Array.isArray(p.specifications) &&
                 p.specifications.some((box) =>
-                    box.fields?.some((f) => typeof f?.description === "string" && f.description.trim().length > 0)
+                    box.fields?.some((f) => isValidSpecValue(f?.description))
                 )
         );
     }, [allAvailableProducts, compareProducts, currentProduct.id, activeComparedProducts]);
@@ -133,7 +134,7 @@ export default function GadgetsCompare({
         }
         return currentProduct.specifications.some((box) =>
             Array.isArray(box.fields) &&
-            box.fields.some((f) => typeof f?.description === "string" && f.description.trim().length > 0)
+            box.fields.some((f) => isValidSpecValue(f?.description))
         );
     }, [currentProduct?.specifications]);
 
@@ -162,6 +163,7 @@ export default function GadgetsCompare({
     const colWidthPercent = `${(100 / totalCols).toFixed(4)}%`;
 
     // Build unified comparison sections from currentProduct + activeComparedProducts
+    // Strictly only include sections and fields where at least one product has valid information
     const comparisonSections = useMemo(() => {
         const sectionMap = new Map<string, { title: string; icon?: string; fields: Set<string> }>();
 
@@ -171,7 +173,8 @@ export default function GadgetsCompare({
                 if (!normTitle) return;
 
                 (box.fields || []).forEach((f) => {
-                    if (f.title?.trim() && typeof f.description === "string" && f.description.trim().length > 0) {
+                    const fTitle = f.title?.trim();
+                    if (fTitle && isValidSpecValue(f.description)) {
                         if (!sectionMap.has(normTitle)) {
                             sectionMap.set(normTitle, {
                                 title: box.title,
@@ -181,7 +184,7 @@ export default function GadgetsCompare({
                         }
                         const entry = sectionMap.get(normTitle)!;
                         if (!entry.icon && box.icon) entry.icon = box.icon;
-                        entry.fields.add(f.title.trim());
+                        entry.fields.add(fTitle);
                     }
                 });
             });
@@ -253,7 +256,7 @@ export default function GadgetsCompare({
                                 <img
                                     src={currentProduct.image}
                                     alt={currentProduct.title}
-                                    className="max-h-full max-w-full object-contain"
+                                    className="max-h-full max-w-full object-contain mix-blend-multiply brightness-105"
                                 />
                             ) : (
                                 <Icon icon="solar:devices-linear" width={48} className="text-gray-300" />
@@ -308,7 +311,7 @@ export default function GadgetsCompare({
                                     <img
                                         src={p.image}
                                         alt={p.title}
-                                        className="max-h-full max-w-full object-contain"
+                                        className="max-h-full max-w-full object-contain mix-blend-multiply brightness-105"
                                     />
                                 ) : (
                                     <Icon icon="solar:devices-linear" width={48} className="text-gray-300" />
@@ -600,16 +603,22 @@ export default function GadgetsCompare({
 
                                                 {/* Product Values (All equal width) */}
                                                 {allItems.map((item, idx) => {
-                                                    const val = getFieldValue(item, sec.title, fieldTitle);
+                                                    const rawVal = getFieldValue(item, sec.title, fieldTitle);
+                                                    const hasVal = isValidSpecValue(rawVal);
                                                     return (
                                                         <td
                                                             key={idx}
                                                             className="px-5 py-3.5 text-gray-900 font-normal leading-relaxed whitespace-pre-line wrap-break-word border-r border-gray-100 last:border-r-0 bg-white align-top"
                                                         >
-                                                            {val ? (
-                                                                <span>{val}</span>
+                                                            {hasVal ? (
+                                                                <span>{rawVal}</span>
                                                             ) : (
-                                                                <span className="text-gray-400 font-normal">Not specified</span>
+                                                                <span
+                                                                    className="text-gray-300 font-bold text-sm tracking-widest select-none"
+                                                                    title="Not available"
+                                                                >
+                                                                    —
+                                                                </span>
                                                             )}
                                                         </td>
                                                     );
