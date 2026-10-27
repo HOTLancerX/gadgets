@@ -359,7 +359,7 @@ function ProductImageShowcase({
                                     }}
                                     type="button"
                                     onClick={() => handleThumbClick(i)}
-                                    className={`relative w-20 h-20 md:w-full md:aspect-square rounded-xl md:rounded-2xl border-2 p-1.5 bg-white shrink-0 transition-all duration-200 cursor-pointer overflow-hidden flex items-center justify-center ${
+                                    className={`relative w-30 h-30 md:w-full md:aspect-square rounded-xl md:rounded-2xl border-2 p-1.5 bg-white shrink-0 transition-all duration-200 cursor-pointer overflow-hidden flex items-center justify-center ${
                                         isSelected
                                             ? "border-blue-600 ring-2 ring-blue-100 shadow-xs scale-102 opacity-100"
                                             : "border-gray-200/90 hover:border-gray-300 opacity-65 hover:opacity-100 hover:scale-101"

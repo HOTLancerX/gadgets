@@ -48,6 +48,7 @@ interface ProductPageProps {
     permalinkMap?: Record<string, string>;
     pageData?: {
         ancestors?: { _id: string; title: string; slug: string }[];
+        tags?: { _id: string; title: string; slug: string }[];
         seller?: {
             _id: string;
             name: string;
@@ -233,6 +234,17 @@ export default function GadgetsProductLayout({
         url: buildUrl(catPrefix, cat.slug),
     }));
 
+    // Breadcrumb tag links
+    const tagPrefix = (permalinkMap["product-tag"] ?? "product/tag")
+        .trim()
+        .replace(/^\/+|\/+$/g, "");
+
+    const tagList = pageData?.tags ?? [];
+    const tagLinks = tagList.map((tag: any) => ({
+        title: tag.title || tag.slug,
+        url: buildUrl(tagPrefix, tag.slug),
+    }));
+
     const sellerPrefix =
         (permalinkMap["seller"] ?? "seller").trim().replace(/^\/+|\/+$/g, "") || "seller";
 
@@ -309,18 +321,27 @@ export default function GadgetsProductLayout({
                 <div className="container py-3">
                     <nav className="flex items-center gap-2 text-xs text-gray-500 overflow-x-auto whitespace-nowrap scrollbar-none">
                         <Link href="/" className="hover:text-blue-600 transition flex items-center gap-1">
-                            <Icon icon="solar:home-2-linear" width={14} />
+                            <Icon icon="solar:home-2-linear" width={14} height={14} className="text-gray-400" />
                             <span>Home</span>
                         </Link>
                         {categoryLinks.map((cat, idx) => (
                             <React.Fragment key={idx}>
-                                <Icon icon="solar:alt-arrow-right-linear" width={12} className="text-gray-400" />
+                                <Icon icon="solar:alt-arrow-right-linear" width={12} height={12} className="text-gray-400" />
                                 <Link href={cat.url} className="hover:text-blue-600 transition font-medium">
                                     {cat.title}
                                 </Link>
                             </React.Fragment>
                         ))}
-                        <Icon icon="solar:alt-arrow-right-linear" width={12} className="text-gray-400" />
+                        {/* tag */}
+                        {tagLinks.map((tag, idx) => (
+                            <React.Fragment key={`tag-${idx}`}>
+                                <Icon icon="solar:alt-arrow-right-linear" width={12} height={12} className="text-gray-400" />
+                                <Link href={tag.url} className="hover:text-blue-600 transition font-medium">
+                                    {tag.title}
+                                </Link>
+                            </React.Fragment>
+                        ))}
+                        <Icon icon="solar:alt-arrow-right-linear" width={12} height={12} className="text-gray-400" />
                         <span className="text-gray-900 font-semibold truncate max-w-xs">{data.title}</span>
                     </nav>
                 </div>
