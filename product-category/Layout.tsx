@@ -50,6 +50,8 @@ interface ProductCatProps {
     permalinkMap?: Record<string, string>;
     pageData?:     CategoryPageData;
     searchParams?: Record<string, string | string[] | undefined>;
+    builderTop?:   React.ReactNode;
+    builderBottom?: React.ReactNode;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -166,6 +168,8 @@ export default function GadgetsCategoryLayout({
     permalinkMap = {},
     pageData,
     searchParams: initialSearchParams = {},
+    builderTop,
+    builderBottom,
 }: ProductCatProps) {
     const router = useRouter();
     const pathname = usePathname();
@@ -562,9 +566,8 @@ export default function GadgetsCategoryLayout({
     );
 
     return (
-        <div className="min-h-screen bg-[#fafbfc] text-[#111827] antialiased">
+        <div className="min-h-screen antialiased">
             <div className="container py-6 md:py-8">
-
                 {/* ── Top Header Row: Category Title & Breadcrumb Chain ── */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6 pb-2">
                     <div>
@@ -600,7 +603,12 @@ export default function GadgetsCategoryLayout({
                         })}
                     </nav>
                 </div>
+            </div>
 
+            {/* builder top */}
+            {builderTop}
+
+            <div className="container py-6 md:py-8">
                 {/* ── Subheader Controls Row: Showing X results & Sort by Dropdown ── */}
                 <div className="flex items-center justify-between gap-4 mb-6 pt-1 flex-wrap">
                     <div className="flex items-center gap-3">
@@ -879,6 +887,9 @@ export default function GadgetsCategoryLayout({
                     </div>
                 )}
             </div>
+
+            {/* builder bottom */}
+            {builderBottom}
 
             {/* ── Variant Popup Modal for Quick Options Select ── */}
             {activeVariantProduct && (

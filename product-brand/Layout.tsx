@@ -46,6 +46,8 @@ interface BrandLayoutProps {
     permalinkMap?: Record<string, string>;
     pageData?:     BrandPageData;
     searchParams?: Record<string, string | string[] | undefined>;
+    builderTop?:   React.ReactNode;
+    builderBottom?: React.ReactNode;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -171,6 +173,8 @@ export default function GadgetsBrandLayout({
     permalinkMap = {},
     pageData,
     searchParams: initialSearchParams = {},
+    builderTop,
+    builderBottom,
 }: BrandLayoutProps) {
     const router = useRouter();
     const pathname = usePathname();
@@ -661,6 +665,9 @@ export default function GadgetsBrandLayout({
                     </nav>
                 </div>
 
+                {/* builder top */}
+                {builderTop}
+
                 {/* ── Popular Categories Carousel / Pill Bar ── */}
                 {popularCategories.length > 0 && (
                     <div className="mb-7">
@@ -1037,6 +1044,9 @@ export default function GadgetsBrandLayout({
                     </div>
                 )}
             </div>
+
+            {/* builder bottom */}
+            {builderBottom}
 
             {/* ── Variant Popup Modal for Quick Options Select ── */}
             {activeVariantProduct && (
