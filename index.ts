@@ -100,6 +100,16 @@ export function register() {
             component: GadgetsCategoryLayout,
         },
         {
+            key: "gadgets-product-tag",
+            label: "Gadgets Tag Layout",
+            type: "product-tag",
+            slug: "dynamic",
+            style: "left",
+            position: 30,
+            active: true,
+            component: GadgetsCategoryLayout,
+        },
+        {
             key: "gadgets-brand",
             label: "Gadgets Brand Layout",
             type: "brands",

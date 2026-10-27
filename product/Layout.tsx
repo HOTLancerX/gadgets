@@ -239,7 +239,22 @@ export default function GadgetsProductLayout({
         .trim()
         .replace(/^\/+|\/+$/g, "");
 
-    const tagList = pageData?.tags ?? [];
+    let tagList = pageData?.tags ?? [];
+    if (tagList.length === 0 && data.info?.tags) {
+        try {
+            const parsed = JSON.parse(data.info.tags);
+            if (Array.isArray(parsed)) {
+                tagList = parsed
+                    .filter((item: any) => typeof item === "object" && item && item.slug)
+                    .map((item: any) => ({
+                        _id: item.id || item._id || item.slug,
+                        title: item.title || item.slug,
+                        slug: item.slug,
+                    }));
+            }
+        } catch {}
+    }
+
     const tagLinks = tagList.map((tag: any) => ({
         title: tag.title || tag.slug,
         url: buildUrl(tagPrefix, tag.slug),
