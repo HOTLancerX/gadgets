@@ -173,6 +173,9 @@ export default function GadgetsCategoryLayout({
 
     const productPrefix = (permalinkMap['product'] ?? 'product').trim().replace(/^\/+|\/+$/g, '') || 'product';
     const catPrefix = (permalinkMap['product-category'] ?? 'product/category').trim().replace(/^\/+|\/+$/g, '');
+    const isTag = (data as any)?.type === 'product-tag';
+    const tagPrefix = (permalinkMap['product-tag'] ?? 'product/tag').trim().replace(/^\/+|\/+$/g, '') || 'product/tag';
+    const currentCatPrefix = isTag ? tagPrefix : catPrefix;
     const currencySymbol = (settings.product_currency_symbol as string) || 'KSh';
 
     const allProducts = useMemo(() => pageData?.products ?? [], [pageData?.products]);
@@ -586,7 +589,7 @@ export default function GadgetsCategoryLayout({
                                         </span>
                                     ) : (
                                         <Link
-                                            href={buildUrl(catPrefix, item.slug)}
+                                            href={buildUrl(currentCatPrefix, item.slug)}
                                             className="text-[#0066cc] hover:underline font-medium transition-colors"
                                         >
                                             {item.title}
